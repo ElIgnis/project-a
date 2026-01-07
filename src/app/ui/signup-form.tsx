@@ -13,15 +13,15 @@ import { useSearchParams } from 'next/navigation';
 
 export default function SignupForm() {
 
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-  const [errorMessage, formAction, isPending] = useActionState(
-    signup,
-    undefined,
-  );
+//   const searchParams = useSearchParams();
+//   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+//   const [errorMessage, formAction, isPending] = useActionState(
+//     signup,
+//     undefined,
+//   );
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <h1 className= "mb-3 text-2xl text-gray-900">
           Account Sign Up
@@ -67,10 +67,10 @@ export default function SignupForm() {
             </div>
           </div>
         </div>
-        <input type="hidden" name="redirectTo" value={callbackUrl} />
+        {/* <input type="hidden" name="redirectTo" value={callbackUrl} />
         <Button className="mt-4 w-full"> 
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
-        </Button>
+        </Button> */}
         {/* <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"
