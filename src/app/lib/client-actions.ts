@@ -5,6 +5,7 @@ import { auth } from '@/../auth'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { headers } from "next/headers"
+import { ValidationError } from 'better-auth';
 
 const SignUpFormSchema = z.object({
   name: z.string(),
@@ -25,7 +26,7 @@ const SignUpFormSchema = z.object({
 // .regex(/[0-9]/, "Must contain at least one number")
 // .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
 
-export type State = {
+export type SignUpFields = {
   validationErrors?: {
     name?: string[];
     email?: string[];
@@ -33,11 +34,9 @@ export type State = {
     confirmPassword?: string[];
   };
   message?: string | null;
-  data?: {} | null;
-  error?: {} | null;
 }
 
-export async function signup(prevState: State, formData: FormData) {
+export async function signup(signupFields: SignUpFields, formData: FormData) {
 
   const validatedFields = SignUpFormSchema.safeParse({
     name: formData.get("username"),
@@ -65,7 +64,8 @@ export async function signup(prevState: State, formData: FormData) {
 
   if(!response.ok) {
     return {
-      message: response.statusText || 'Login Failed'
+      validationErrors: {},
+      message: response.statusText || 'Signup Failed'
     }
   }
 
@@ -80,7 +80,15 @@ const LoginFormSchema = z.object({
   password: z.string().min(8, "Must be at least 8 characters")
 });
 
-export async function login(prevState: State | undefined, formData: FormData) {
+export type LoginFields = {
+  validationErrors?: {
+    email?: string[];
+    password?: string[];
+  };
+  message?: string | null;
+}
+
+export async function login(loginFields: LoginFields | undefined, formData: FormData) {
 
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
@@ -104,6 +112,7 @@ export async function login(prevState: State | undefined, formData: FormData) {
 
   if(!response.ok) {
     return {
+      validationErrors: {},
       message: response.statusText || 'Login Failed'
     }
   }

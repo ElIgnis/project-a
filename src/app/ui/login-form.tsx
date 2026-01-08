@@ -7,12 +7,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from '@/app/ui/button';
-import { login, State } from '@/app/lib/client-actions'
+import { login, LoginFields } from '@/app/lib/client-actions'
 import { useActionState } from 'react';
 
 export default function LoginForm() {
 
-  const initialState: State = { message:null, validationErrors: {}, data:{}, error:{} };
+  const initialState: LoginFields = { validationErrors: {}, message:null };
   const [state, formAction] = useActionState(login, initialState);
 
   return (

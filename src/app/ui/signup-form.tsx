@@ -7,13 +7,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from '@/app/ui/button';
-import { signup, State } from '@/app/lib/client-actions'
+import { signup, SignUpFields } from '@/app/lib/client-actions'
 import { useActionState } from 'react';
-import { useRouter } from 'next/navigation'
 
 export default function SignupForm() {
 
-  const initialState: State = { message:null, validationErrors: {}, data:{}, error:{} };
+  const initialState: SignUpFields = { validationErrors: {}, message:null };
   const [state, formAction] = useActionState(signup, initialState);
 
   return (
