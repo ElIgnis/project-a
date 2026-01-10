@@ -1,42 +1,9 @@
-'use server'
+'use client'
 
-import { z } from 'zod';
-import { auth } from '@/../auth'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { headers } from "next/headers"
-import { ValidationError } from 'better-auth';
+import { authClient } from '@/../lib/auth-client'
+import { SignUpFormSchema, LoginFormSchema } from '@/../lib/utils/form-validation'
 
-const SignUpFormSchema = z.object({
-  name: z.string(),
-  email: z.email({
-    pattern: z.regexes.unicodeEmail
-  }),
-  password: z.string()
-    .min(8, "Must be at least 8 characters"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
-})
-
-
-// .regex(/[A-Z]/, "Must contain at least one uppercase letter")
-// .regex(/[a-z]/, "Must contain at least one lowercase letter")
-// .regex(/[0-9]/, "Must contain at least one number")
-// .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
-
-export type SignUpFields = {
-  validationErrors?: {
-    name?: string[];
-    email?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-  };
-  message?: string | null;
-}
-
-export async function signup(signupFields: SignUpFields, formData: FormData) {
+export async function signup(formData: FormData) {
 
   const validatedFields = SignUpFormSchema.safeParse({
     name: formData.get("username"),
@@ -51,44 +18,29 @@ export async function signup(signupFields: SignUpFields, formData: FormData) {
       message: 'Missing Fields, Sign up failed.',
     }
   }
-
-  const response = await auth.api.signUpEmail({
-    body: {
+  
+  const { data, error } = await authClient.signUp.email({
     name: validatedFields.data.name,
     email: validatedFields.data.email,
     password: validatedFields.data.password,
     callbackURL: "/dashboard"
-    }
-    ,asResponse: true
+  }, {
+    onRequest: (ctx) => {
+      //show loading
+    },
+    onSuccess: (ctx) => {
+      //redirect to the dashboard or sign in page
+    },
+    onError: (ctx) => {
+      // display the error message
+      console.log(ctx.error.message);
+    },
   });
-
-  if(!response.ok) {
-    return {
-      validationErrors: {},
-      message: response.statusText || 'Signup Failed'
-    }
-  }
-
-  revalidatePath('/dashboard');
-  redirect('/dashboard');
+  
+  return { data, error }
 }
 
-const LoginFormSchema = z.object({
-  email: z.email({
-    pattern: z.regexes.unicodeEmail
-  }),
-  password: z.string().min(8, "Must be at least 8 characters")
-});
-
-export type LoginFields = {
-  validationErrors?: {
-    email?: string[];
-    password?: string[];
-  };
-  message?: string | null;
-}
-
-export async function login(loginFields: LoginFields | undefined, formData: FormData) {
+export async function login(formData: FormData) {
 
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
@@ -98,39 +50,36 @@ export async function login(loginFields: LoginFields | undefined, formData: Form
   if (!validatedFields.success) {
     return {
       validationErrors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields, Login failed.',
+      message: 'Missing or incomplete fields, Login failed.',
     }
   }
 
-  const response = await auth.api.signInEmail({
-    body: {
-      email: validatedFields.data.email,
-      password: validatedFields.data.password
+  const { data, error } = await authClient.signIn.email({
+    email: validatedFields.data.email,
+    password: validatedFields.data.password,
+    callbackURL: "/dashboard"
+  },{
+    onRequest: (ctx) => {
+      //show loading
     },
-    asResponse: true
+    onSuccess: (ctx) => {
+      //redirect to the dashboard or sign in page
+    },
+    onError: (ctx) => {
+      // display the error message
+    },
   });
-
-  if(!response.ok) {
-    return {
-      validationErrors: {},
-      message: response.statusText || 'Login Failed'
-    }
-  }
-
-  revalidatePath('/dashboard');
-  redirect('/dashboard');
+  
+  return { data, error };
 }
 
 export async function logout() {
+  
   try {
-    await auth.api.signOut({
-      headers: await headers()
-    });
-
-    redirect('/login');
-  } catch(e) {
-    console.error('Logout error' + e);
-    return { error: 'Failed to logout'};
+    await authClient.signOut();
+    window.location.href = "/login";
+  } catch (e) {
+    throw new Error("Logout Failure" + e);
   }
 }
 

@@ -7,16 +7,52 @@ import {
 } from '@heroicons/react/24/outline';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import { Button } from '@/app/ui/button';
-import { signup, SignUpFields } from '@/app/lib/client-actions'
-import { useActionState } from 'react';
+import { signup } from '@/app/lib/client-actions'
+import { SignUpValidationErrors } from '@/../lib/utils/form-validation'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation'
 
 export default function SignupForm() {
 
-  const initialState: SignUpFields = { validationErrors: {}, message:null };
-  const [state, formAction] = useActionState(signup, initialState);
+  const [validationErrors, setValidationErrors] = useState<SignUpValidationErrors | null>(null);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [signupFailedError, setSignupFailedError] = useState<string | undefined>("");
+
+  const router = useRouter();
+
+  const handleSignUp = async(e:React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const result = await signup(formData);
+      
+      // Client sided errors
+      if(result.validationErrors) {
+        setValidationErrors({
+          email: result.validationErrors.email,
+          password: result.validationErrors.password,
+          message: result.message});
+        setSignupFailedError(result.message);
+
+        if(result.validationErrors.password) {
+          setPasswordInput("");
+          setConfirmPasswordInput("");  
+        }
+        return;
+      }
+
+      // Server sided errors
+      if(result.error) {
+        setSignupFailedError(result.error.message);
+        return;
+      }
+
+      // Redirect if no issues
+      router.push('/dashboard');
+  }
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form onSubmit={handleSignUp} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <h1 className= "mb-3 text-2xl text-gray-900">
           Account Sign Up
@@ -37,8 +73,17 @@ export default function SignupForm() {
                 name="username"
                 placeholder="Enter your username"
                 required
+                aria-describedby='name-error'
               />
               <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            <div id="name-error" aria-live="polite" aria-atomic="true">
+                {validationErrors?.name &&
+                  validationErrors.name.map((error: string) => (
+                    <p className="mt-2 text-sm text-red-500" key={error}>
+                      {error}
+                    </p>
+                ))}
             </div>
           </div>
 
@@ -57,9 +102,18 @@ export default function SignupForm() {
                 name="email"
                 placeholder="Enter your email address"
                 required
+                aria-describedby='email-error'
               />
               <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
+            <div id="email-error" aria-live="polite" aria-atomic="true">
+              {validationErrors?.email &&
+                validationErrors.email.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+              ))}
+          </div>
           </div>
           
           <div className="mt-4">
@@ -77,9 +131,20 @@ export default function SignupForm() {
                 name="password"
                 placeholder="Enter password"
                 required
-                minLength={6}
+                minLength={8}
+                value={passwordInput}
+                onChange={e=>{setPasswordInput(e.target.value)}}
+                aria-describedby='password-error'
               />
               <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            </div>
+            <div id="password-error" aria-live="polite" aria-atomic="true">
+                {validationErrors?.password &&
+                  validationErrors.password.map((error: string) => (
+                    <p className="mt-2 text-sm text-red-500" key={error}>
+                      {error}
+                    </p>
+                ))}
             </div>
           </div>
 
@@ -97,10 +162,22 @@ export default function SignupForm() {
                 type="password"
                 name="confirmPassword"
                 placeholder="Re-enter your password"
+                value={confirmPasswordInput}
+                onChange={e=>{setConfirmPasswordInput(e.target.value)}}
+                minLength={8}
                 required
+                aria-describedby='confirm-password-error'
               />
               <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
+          </div>
+          <div id="confirm-password-error" aria-live="polite" aria-atomic="true">
+              {validationErrors?.confirmPassword &&
+                validationErrors.confirmPassword.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
+              ))}
           </div>
 
         </div>
@@ -109,22 +186,13 @@ export default function SignupForm() {
           Sign Up <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
         
-        {/* <div id="status-error" aria-live="polite" aria-atomic="true">
-            {state.validationErrors?.email &&
-              state.validationErrors.email.map((error: string) => (
-                <p className="mt-2 text-sm text-red-500" key={error}>
-                  {error}
-                </p>
-            ))}
-        </div> */}
-
         <div id="form-submit-error" aria-live="polite" aria-atomic="true">
-          {state.validationErrors &&
+          {(validationErrors || signupFailedError) &&
             <p className="mt-2 text-sm text-red-500">
-                {state.message}
-              </p>
+                {signupFailedError}
+            </p>
           }
-          </div>
+        </div>
       </div>
     </form>
   );

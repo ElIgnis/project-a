@@ -7,9 +7,9 @@ import {
 import { logout } from '@/app/lib/client-actions'
 
 export function LogoutSection() {
+
     return (
         <div>
-
             <p>Dashboard Page</p>
             <Button onClick={logout} className="mt-4 w-1/6">
                 Logout <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
