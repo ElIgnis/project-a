@@ -1,6 +1,4 @@
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import styles from "@/styles/home.module.css";
-import { lusitanaFont } from "@/styles/fonts";
+import { LuLogIn  } from "react-icons/lu";
 import Link from "next/link";
 
 export default function Home() {
@@ -15,15 +13,15 @@ export default function Home() {
                         </p>
                         <Link
                             href="/login"
-                            className="flex justify-center gap-2 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+                            className="flex justify-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
                         >
-                            <span>Log in</span> <ArrowRightIcon className="w-5 md:w-6" />
+                            <span className="align-center">Login</span><LuLogIn className="w-5 md:w-6 mt-1" />
                         </Link>
                         <Link
                             href="/signup"
-                            className="flex justify-center gap-2 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+                            className="flex justify-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
                         >
-                            <span>Sign up</span> <ArrowRightIcon className="w-5 md:w-6" />
+                            <span>Sign up</span>
                         </Link>
                     </div>
                 </div>

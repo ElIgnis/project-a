@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  AtSymbolIcon,
-  KeyIcon,
-  ExclamationCircleIcon,
-} from '@heroicons/react/24/outline';
-import { ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/20/solid';
+import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft, LuUserRound   } from "react-icons/lu";
 import { Button } from '@/app/ui/button';
 import { signup } from '@/app/lib/client-actions'
 import { SignUpValidationErrors } from '@/../lib/utils/form-validation'
@@ -57,10 +52,10 @@ export default function SignupForm() {
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <Link
             href="/"
-            className="flex w-min justify-center gap-2 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+            className="flex w-min justify-center gap-4 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
         >
-            <ArrowLeftIcon className="w-5 md:w-6" />
-            <span>Back</span> 
+            <LuArrowLeft className="ml-auto h-6 w-6 text-gray-50" /> 
+            Back
         </Link>
         <div className="justify-items-center">
           <h1 className= "mb-3 text-2xl text-gray-900">
@@ -84,7 +79,7 @@ export default function SignupForm() {
                   required
                   aria-describedby='name-error'
                 />
-                <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                <LuUserRound className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
               <div id="name-error" aria-live="polite" aria-atomic="true">
                   {validationErrors?.name &&
@@ -113,7 +108,7 @@ export default function SignupForm() {
                   required
                   aria-describedby='email-error'
                 />
-                <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                <LuAtSign className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
               <div id="email-error" aria-live="polite" aria-atomic="true">
                 {validationErrors?.email &&
@@ -145,7 +140,7 @@ export default function SignupForm() {
                   onChange={e=>{setPasswordInput(e.target.value)}}
                   aria-describedby='password-error'
                 />
-                <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                <LuKey className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
               <div id="password-error" aria-live="polite" aria-atomic="true">
                   {validationErrors?.password &&
@@ -177,7 +172,7 @@ export default function SignupForm() {
                   required
                   aria-describedby='confirm-password-error'
                 />
-                <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                <LuKey className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
             </div>
             <div id="confirm-password-error" aria-live="polite" aria-atomic="true">
@@ -192,7 +187,7 @@ export default function SignupForm() {
           </div>
           <input type="hidden" name="redirectTo" />
           <Button className="mt-4 w-min gap-4 text-nowrap"> 
-            Sign Up <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
+            Sign Up <LuArrowRight className="ml-auto h-6 w-6 text-gray-50" />
           </Button>
           
           <div id="form-submit-error" aria-live="polite" aria-atomic="true">

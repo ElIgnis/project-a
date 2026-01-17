@@ -1,7 +1,8 @@
-﻿import {LogoutSection} from '@/app/ui/dashboard/logout-section'
+
 import { headers } from 'next/headers'
 import { auth } from '@/../auth'
 import { redirect } from 'next/navigation';
+import  TopicsBoard  from '@/app/ui/posting-board/topics-board'
 
 export default async function Page() {
   const session = await auth.api.getSession({
@@ -14,6 +15,8 @@ export default async function Page() {
     redirect('/login');
   }
   return (
-    <LogoutSection/>
+    <>
+      <TopicsBoard/>
+    </>
   );
 }
