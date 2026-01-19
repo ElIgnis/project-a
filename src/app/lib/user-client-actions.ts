@@ -1,7 +1,8 @@
 'use client'
 
 import { authClient } from '@/../lib/auth-client'
-import { SignUpFormSchema, LoginFormSchema } from '@/../lib/utils/form-validation'
+import { SignUpFormSchema, LoginFormSchema } from '../../../lib/utils/user-form-validation'
+import { z } from 'zod';
 
 export async function signup(formData: FormData) {
 
@@ -13,8 +14,10 @@ export async function signup(formData: FormData) {
   });
 
   if (!validatedFields.success) {
+    const flattenedErrors = z.flattenError(validatedFields.error);
+
     return {
-      validationErrors: validatedFields.error.flatten().fieldErrors,
+      validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing Fields, Sign up failed.',
     }
   }
@@ -48,8 +51,10 @@ export async function login(formData: FormData) {
   });
 
   if (!validatedFields.success) {
+    const flattenedErrors = z.flattenError(validatedFields.error);
+
     return {
-      validationErrors: validatedFields.error.flatten().fieldErrors,
+      validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing or incomplete fields, Login failed.',
     }
   }

@@ -1,10 +1,11 @@
 'use server'
 
 import { auth } from '@/../auth'
+import { z } from 'zod';
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { headers } from "next/headers"
-import { SignUpFields, SignUpFormSchema, LoginFields, LoginFormSchema } from './utils/form-validation'
+import { SignUpFields, SignUpFormSchema, LoginFields, LoginFormSchema } from './utils/user-form-validation'
 
 export async function signup(signupFields: SignUpFields, formData: FormData) {
 
@@ -16,8 +17,10 @@ export async function signup(signupFields: SignUpFields, formData: FormData) {
   });
 
   if (!validatedFields.success) {
+    const flattenedErrors = z.flattenError(validatedFields.error);
+
     return {
-      validationErrors: validatedFields.error.flatten().fieldErrors,
+      validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing Fields, Sign up failed.',
     }
   }
@@ -51,8 +54,10 @@ export async function login(loginFields: LoginFields | undefined, formData: Form
   });
 
   if (!validatedFields.success) {
+    const flattenedErrors = z.flattenError(validatedFields.error);
+
     return {
-      validationErrors: validatedFields.error.flatten().fieldErrors,
+      validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing Fields, Login failed.',
     }
   }
