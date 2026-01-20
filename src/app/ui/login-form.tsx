@@ -2,9 +2,9 @@
 
 import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft  } from "react-icons/lu";
 import { Button } from '@/app/ui/button';
-import { login } from '@/app/lib/client-actions'
+import { login } from '@/app/lib/user-client-actions'
 import { useState } from 'react';
-import { LoginValidationErrors } from '@/../lib/utils/form-validation'
+import { LoginValidationErrors } from '../../../lib/utils/user-form-validation'
 import Link from 'next/link'
 
 export default function LoginForm() {
@@ -18,21 +18,23 @@ export default function LoginForm() {
       const formData = new FormData(e.currentTarget);
       const result = await login(formData);
       
+    if (!result.success) {
+      // Server sided errors
+      if (result.apiError) {
+        setLoginFailedError(result.apiError);
+      } 
       // Client sided errors
-      if(result.validationErrors) {
+      else if (result.validationErrors) {
         setValidationErrors({
           email: result.validationErrors.email,
           password: result.validationErrors.password,
-          message: result.message});
+        });
+        console.log("b");
         setLoginFailedError(result.message);
-        if(result.validationErrors.password)
+        if (result.validationErrors.password)
           setPasswordInput("");
       }
-
-      // Server sided errors
-      if(result.error) {
-        setLoginFailedError(result.error.message);
-      }
+    }
   }
 
   return (
@@ -113,7 +115,7 @@ export default function LoginForm() {
               </div>
             </div>
           </div>
-          <input type="hidden" name="redirectTo" />
+          {/* <input type="hidden" name="redirectTo" /> */}
           <Button className="mt-4 w-min gap-4"> 
             Login <LuArrowRight className="ml-auto h-5 w-5 text-gray-50" />
           </Button>

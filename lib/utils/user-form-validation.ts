@@ -5,7 +5,6 @@ export interface SignUpValidationErrors {
   email?: string[] | undefined,
   password?: string[] | undefined
   confirmPassword?: string[] | undefined
-  message: string
 }
 
 export type SignUpFields = {
@@ -38,7 +37,6 @@ export const SignUpFormSchema = z.object({
 export interface LoginValidationErrors {
   email?: string[] | undefined,
   password?: string[] | undefined
-  message: string
 }
 
 export type LoginFields = {

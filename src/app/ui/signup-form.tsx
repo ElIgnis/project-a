@@ -1,9 +1,9 @@
 'use client';
 
-import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft, LuUserRound   } from "react-icons/lu";
+import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft, LuUserRound } from "react-icons/lu";
 import { Button } from '@/app/ui/button';
-import { signup } from '@/app/lib/client-actions'
-import { SignUpValidationErrors } from '@/../lib/utils/form-validation'
+import { signup } from '@/app/lib/user-client-actions'
+import { SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -17,52 +17,53 @@ export default function SignupForm() {
 
   const router = useRouter();
 
-  const handleSignUp = async(e:React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const formData = new FormData(e.currentTarget);
-      const result = await signup(formData);
-      
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const result = await signup(formData);
+
+    if (!result.success) {
+      // Server sided errors
+      if (result.apiError) {
+        setSignupFailedError(result.message);
+        return;
+      }
+
       // Client sided errors
-      if(result.validationErrors) {
+      else if (result.validationErrors) {
         setValidationErrors({
           email: result.validationErrors.email,
           password: result.validationErrors.password,
-          message: result.message});
+        });
         setSignupFailedError(result.message);
 
-        if(result.validationErrors.password) {
+        if (result.validationErrors.password) {
           setPasswordInput("");
-          setConfirmPasswordInput("");  
+          setConfirmPasswordInput("");
         }
         return;
       }
-
-      // Server sided errors
-      if(result.error) {
-        setSignupFailedError(result.error.message);
-        return;
-      }
-
-      // Redirect if no issues
-      router.push('/dashboard');
+    }
+    // Redirect if no issues
+    router.push('/dashboard');
   }
 
   return (
     <form onSubmit={handleSignUp} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <Link
-            href="/"
-            className="flex w-min justify-center gap-4 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+          href="/"
+          className="flex w-min justify-center gap-4 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
         >
-            <LuArrowLeft className="ml-auto h-6 w-6 text-gray-50" /> 
-            Back
+          <LuArrowLeft className="ml-auto h-6 w-6 text-gray-50" />
+          Back
         </Link>
         <div className="justify-items-center">
-          <h1 className= "mb-3 text-2xl text-gray-900">
+          <h1 className="mb-3 text-2xl text-gray-900">
             Account Sign Up
           </h1>
           <div className="w-3/6 min-w-96 max-w-2/12">
-          <div>
+            <div>
               <label
                 className="mb-3 mt-5 block text-xs font-medium text-gray-900"
                 htmlFor="name"
@@ -82,11 +83,11 @@ export default function SignupForm() {
                 <LuUserRound className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
               <div id="name-error" aria-live="polite" aria-atomic="true">
-                  {validationErrors?.name &&
-                    validationErrors.name.map((error: string) => (
-                      <p className="mt-2 text-sm text-red-500" key={error}>
-                        {error}
-                      </p>
+                {validationErrors?.name &&
+                  validationErrors.name.map((error: string) => (
+                    <p className="mt-2 text-sm text-red-500" key={error}>
+                      {error}
+                    </p>
                   ))}
               </div>
             </div>
@@ -116,10 +117,10 @@ export default function SignupForm() {
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
                     </p>
-                ))}
+                  ))}
+              </div>
             </div>
-            </div>
-            
+
             <div className="mt-4">
               <label
                 className="mb-3 mt-5 block text-xs font-medium text-gray-900"
@@ -137,17 +138,17 @@ export default function SignupForm() {
                   required
                   minLength={8}
                   value={passwordInput}
-                  onChange={e=>{setPasswordInput(e.target.value)}}
+                  onChange={e => { setPasswordInput(e.target.value) }}
                   aria-describedby='password-error'
                 />
                 <LuKey className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
               <div id="password-error" aria-live="polite" aria-atomic="true">
-                  {validationErrors?.password &&
-                    validationErrors.password.map((error: string) => (
-                      <p className="mt-2 text-sm text-red-500" key={error}>
-                        {error}
-                      </p>
+                {validationErrors?.password &&
+                  validationErrors.password.map((error: string) => (
+                    <p className="mt-2 text-sm text-red-500" key={error}>
+                      {error}
+                    </p>
                   ))}
               </div>
             </div>
@@ -167,7 +168,7 @@ export default function SignupForm() {
                   name="confirmPassword"
                   placeholder="Re-enter your password"
                   value={confirmPasswordInput}
-                  onChange={e=>{setConfirmPasswordInput(e.target.value)}}
+                  onChange={e => { setConfirmPasswordInput(e.target.value) }}
                   minLength={8}
                   required
                   aria-describedby='confirm-password-error'
@@ -176,24 +177,24 @@ export default function SignupForm() {
               </div>
             </div>
             <div id="confirm-password-error" aria-live="polite" aria-atomic="true">
-                {validationErrors?.confirmPassword &&
-                  validationErrors.confirmPassword.map((error: string) => (
-                    <p className="mt-2 text-sm text-red-500" key={error}>
-                      {error}
-                    </p>
+              {validationErrors?.confirmPassword &&
+                validationErrors.confirmPassword.map((error: string) => (
+                  <p className="mt-2 text-sm text-red-500" key={error}>
+                    {error}
+                  </p>
                 ))}
             </div>
 
           </div>
           <input type="hidden" name="redirectTo" />
-          <Button className="mt-4 w-min gap-4 text-nowrap"> 
+          <Button className="mt-4 w-min gap-4 text-nowrap">
             Sign Up <LuArrowRight className="ml-auto h-6 w-6 text-gray-50" />
           </Button>
-          
+
           <div id="form-submit-error" aria-live="polite" aria-atomic="true">
             {(validationErrors || signupFailedError) &&
               <p className="mt-2 text-sm text-red-500">
-                  {signupFailedError}
+                {signupFailedError}
               </p>
             }
           </div>

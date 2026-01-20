@@ -1,10 +1,12 @@
 'use client'
 
 import { authClient } from '@/../lib/auth-client'
-import { SignUpFormSchema, LoginFormSchema } from '../../../lib/utils/user-form-validation'
+import { SignUpFormSchema, LoginFormSchema, LoginValidationErrors, SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
 import { z } from 'zod';
 
-export async function signup(formData: FormData) {
+type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
+
+export async function signup(formData: FormData): Promise<SignUpResult> {
 
   const validatedFields = SignUpFormSchema.safeParse({
     name: formData.get("username"),
@@ -17,8 +19,10 @@ export async function signup(formData: FormData) {
     const flattenedErrors = z.flattenError(validatedFields.error);
 
     return {
+      success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing Fields, Sign up failed.',
+      message: 'Missing or incomplete fields, Sign up failed.',
+      apiError: undefined
     }
   }
   
@@ -40,10 +44,16 @@ export async function signup(formData: FormData) {
     },
   });
   
-  return { data, error }
+  if(error) {
+    return { success: false, message: undefined, apiError: error.message }
+  }
+  
+  return { success: true };
 }
 
-export async function login(formData: FormData) {
+type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
+
+export async function login(formData: FormData): Promise<LoginResult> {
 
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
@@ -54,8 +64,10 @@ export async function login(formData: FormData) {
     const flattenedErrors = z.flattenError(validatedFields.error);
 
     return {
+      success: false,
       validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing or incomplete fields, Login failed.',
+      apiError: undefined
     }
   }
 
@@ -74,8 +86,12 @@ export async function login(formData: FormData) {
       // display the error message
     },
   });
+
+  if(error) {
+    return { success: false, message: undefined, apiError: error.message }
+  }
   
-  return { data, error };
+  return { success: true };
 }
 
 export async function logout() {
