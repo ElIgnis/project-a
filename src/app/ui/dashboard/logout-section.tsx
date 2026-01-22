@@ -2,7 +2,7 @@
 
 import { Button } from '@/app/ui/button';
 import { LuArrowRightFromLine  } from "react-icons/lu";
-import { logout } from '@/app/lib/client-actions'
+import { logout } from '@/app/lib/user-client-actions'
 
 export function LogoutSection() {
 

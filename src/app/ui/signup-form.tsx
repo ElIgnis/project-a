@@ -4,7 +4,7 @@ import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft, LuUserRound } from "react-i
 import { Button } from '@/app/ui/button';
 import { signup } from '@/app/lib/user-client-actions'
 import { SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
-import { useState } from 'react';
+import { useState, useEffect, useActionState } from 'react';
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -16,40 +16,39 @@ export default function SignupForm() {
   const [signupFailedError, setSignupFailedError] = useState<string | undefined>("");
 
   const router = useRouter();
+  const [result, signupFormAction, isPending] = useActionState(signup, null);
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const result = await signup(formData);
+  useEffect(() => {
+    if (result) {
+      if (!result.success) {
 
-    if (!result.success) {
-      // Server sided errors
-      if (result.apiError) {
-        setSignupFailedError(result.message);
-        return;
-      }
-
-      // Client sided errors
-      else if (result.validationErrors) {
-        setValidationErrors({
-          email: result.validationErrors.email,
-          password: result.validationErrors.password,
-        });
-        setSignupFailedError(result.message);
-
-        if (result.validationErrors.password) {
-          setPasswordInput("");
-          setConfirmPasswordInput("");
+        // Server sided errors
+        if (result.apiError) {
+          setSignupFailedError(result.message);
+          return;
         }
-        return;
+
+        // Client sided errors
+        else if (result.validationErrors) {
+          setValidationErrors({
+            email: result.validationErrors.email,
+            password: result.validationErrors.password,
+          });
+          setSignupFailedError(result.message);
+
+          if (result.validationErrors.password) {
+            setPasswordInput("");
+            setConfirmPasswordInput("");
+          }
+        }
       }
+      // Redirect if no issues
+      router.push('/dashboard');
     }
-    // Redirect if no issues
-    router.push('/dashboard');
-  }
+  }, [result]);
 
   return (
-    <form onSubmit={handleSignUp} className="space-y-3">
+    <form action={signupFormAction} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <Link
           href="/"

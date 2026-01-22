@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
 
-export async function signup(formData: FormData): Promise<SignUpResult> {
+export async function signup(prevState: any, formData: FormData): Promise<SignUpResult> {
 
   const validatedFields = SignUpFormSchema.safeParse({
     name: formData.get("username"),
@@ -21,7 +21,7 @@ export async function signup(formData: FormData): Promise<SignUpResult> {
     return {
       success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing or incomplete fields, Sign up failed.',
+      message: 'Missing or incomplete fields, sign up failed.',
       apiError: undefined
     }
   }
@@ -53,7 +53,7 @@ export async function signup(formData: FormData): Promise<SignUpResult> {
 
 type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
 
-export async function login(formData: FormData): Promise<LoginResult> {
+export async function login(prevState: any, formData: FormData): Promise<LoginResult> {
 
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
@@ -66,7 +66,7 @@ export async function login(formData: FormData): Promise<LoginResult> {
     return {
       success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing or incomplete fields, Login failed.',
+      message: 'Missing or incomplete fields, login failed.',
       apiError: undefined
     }
   }

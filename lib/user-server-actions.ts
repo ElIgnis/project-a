@@ -5,9 +5,11 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { headers } from "next/headers"
-import { SignUpFields, SignUpFormSchema, LoginFields, LoginFormSchema } from './utils/user-form-validation'
+import { SignUpFormSchema, LoginFormSchema, SignUpValidationErrors, LoginValidationErrors } from './utils/user-form-validation'
 
-export async function signup(signupFields: SignUpFields, formData: FormData) {
+type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
+
+export async function signup(prevState: any, formData: FormData): Promise<SignUpResult> {
 
   const validatedFields = SignUpFormSchema.safeParse({
     name: formData.get("username"),
@@ -20,8 +22,10 @@ export async function signup(signupFields: SignUpFields, formData: FormData) {
     const flattenedErrors = z.flattenError(validatedFields.error);
 
     return {
+      success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing Fields, Sign up failed.',
+      message: 'Missing or incomplete fields, sign up failed.',
+      apiError: undefined
     }
   }
 
@@ -36,17 +40,16 @@ export async function signup(signupFields: SignUpFields, formData: FormData) {
   });
 
   if(!response.ok) {
-    return {
-      validationErrors: {},
-      message: response.statusText || 'Signup Failed'
-    }
+    return { success: false, message: undefined, apiError: response.text.toString() }
   }
 
   revalidatePath('/dashboard');
   redirect('/dashboard');
 }
 
-export async function login(loginFields: LoginFields | undefined, formData: FormData) {
+type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
+
+export async function login(prevState: any, formData: FormData) : Promise<LoginResult> {
 
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),
@@ -57,8 +60,10 @@ export async function login(loginFields: LoginFields | undefined, formData: Form
     const flattenedErrors = z.flattenError(validatedFields.error);
 
     return {
+      success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing Fields, Login failed.',
+      message: 'Missing or incomplete fields, login failed.',
+      apiError: undefined
     }
   }
 
@@ -71,10 +76,7 @@ export async function login(loginFields: LoginFields | undefined, formData: Form
   });
 
   if(!response.ok) {
-    return {
-      validationErrors: {},
-      message: response.statusText || 'Login Failed'
-    }
+    return { success: false, message: undefined, apiError: response.text.toString() }
   }
 
   revalidatePath('/dashboard');
