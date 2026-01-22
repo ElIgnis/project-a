@@ -21,8 +21,8 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
     const currentUser = userData.id;
 
 
-    const toggleCommentMenu = (id) => {
-        setShowCommentMenu(prev => ({ ...prev, [id]: !prev[id] }));
+    const toggleCommentMenu = (id: string) => {
+        // setShowCommentMenu(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
     useEffect(() => {
