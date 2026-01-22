@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react';
-import { LuThumbsUp , LuThumbsDown, LuEllipsisVertical , LuSquarePen , LuTrash2, LuPencilLine } from 'react-icons/lu';
+import { LuThumbsUp , LuThumbsDown, LuEllipsisVertical , LuSquarePen , LuTrash2, LuPencilLine, LuArrowRight } from 'react-icons/lu';
 import { User } from 'better-auth';
 import Link from 'next/link'
 import { Topic } from '@/../lib/utils/topics-validation';
@@ -21,7 +21,7 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
     return (
         <div className="max-w-4xl mx-auto p-4 space-y-4">
 
-            {/* Comments Section */}
+            {/* Topics Section */}
             <div className="bg-white rounded-lg shadow-md p-4">
                 <h3 className="text-xl font-bold text-gray-900 mb-4">{postTopics.length > 0 ? `Topics (${postTopics.length})` : "No Topics Yet"}</h3>
 
@@ -35,7 +35,7 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
                                     <span>Insert Date here</span>
                                 </div>
 
-                                {/* Comment Menu (Only for owner) */}
+                                {/* Topic Edit Menu (Only for owner) */}
                                 {postTopic.userId === currentUser && (
                                     <div className="relative">
                                         <button
@@ -72,6 +72,15 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
                                     <LuThumbsDown size={16} />
                                     <span>{postTopic.dislikes}</span>
                                 </button>
+                            </div>
+
+                            <div className="flex w-full justify-end mt-2">
+                                <Link
+                                    href={`/dashboard/topics-board/${postTopic._id}`}
+                                    className="text-sm text-blue-600 hover:underline"
+                                >
+                                    View Post <LuArrowRight className="inline-block h-4 w-4 text-blue-600" />
+                                </Link>
                             </div>
                         </div>
                     ))}
