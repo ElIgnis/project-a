@@ -146,13 +146,8 @@ async function handleReactions(db: Db, userId: string, targetId: string, targetT
 
     const objectTargetId = new ObjectId(targetId);
 
-    console.log(existingReaction?.reactionType + ' vs ' + reactionType);
-    console.log(targetId + " " + objectTargetId);
-
-
     // Remove reaction
     if(existingReaction?.reactionType === reactionType) {
-        console.log('Removing reaction from ' + targetType);
         await userReactions.deleteOne({ userId, targetId: targetId });
         await targetCollection.updateOne(
             { _id: objectTargetId },
@@ -161,7 +156,6 @@ async function handleReactions(db: Db, userId: string, targetId: string, targetT
     }
     // Change reaction
     else if(existingReaction) {
-        console.log('Changing reaction for '  + targetType);
         const prevReactionType = existingReaction.reactionType;
 
         await userReactions.updateOne( 
@@ -190,7 +184,6 @@ async function handleReactions(db: Db, userId: string, targetId: string, targetT
             { _id: objectTargetId },
             { $inc: { [reactionType === 'like' ? 'likes' : 'dislikes']: 1 } }
         );
-        console.log(targetCollection.collectionName + ' reaction added result: ', updateRes);
     }
 }
     
