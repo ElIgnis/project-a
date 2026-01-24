@@ -44,22 +44,6 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         lastEditedAt: comment.lastEditedAt.toISOString(),
     }));
 
-//     const parsedTopicComments: TopicComment[] = topicPostComments.map(comment => {
-//     const cleaned = JSON.parse(JSON.stringify(comment)); // Forces serialization
-    
-//     return {
-//         _id: cleaned._id,
-//         postId: cleaned.postId,
-//         content: cleaned.content,
-//         userId: cleaned.userId,
-//         username: idMappedUsernames.get(comment.userId.toString()) || "Deleted User",
-//         likes: cleaned.likes,
-//         dislikes: cleaned.dislikes,
-//         lastEditedAt: cleaned.lastEditedAt,
-//     };
-// });
-
-    console.log(parsedTopicComments);
     return (
         <TopicPost userData={session.user} postTopic={parsedTopic} postTopicComments={parsedTopicComments} />
     );

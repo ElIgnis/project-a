@@ -26,7 +26,6 @@ export default async function TopicsBoardPage() {
     dislikes: topic.dislikes,
     comments: topic.comments
   }));
-  console.log(retrievedTopics);
 
   return (
     <>

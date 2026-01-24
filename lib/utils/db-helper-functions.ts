@@ -7,7 +7,7 @@ export default async function GetUsernamesByIds(userIds: string[]): Promise<Map<
     const uniqueIds = [...new Set(userIds)];
 
     const users = await usersCollection.find(
-        { _id: { $in: uniqueIds.map(id => new ObjectId(id)) } },
+        { _id: { $in: uniqueIds.map(id => new ObjectId(id)) } },    // Select documents where value of field === any value in array
         { projection: { id: 1, name: 1 } }
     ).toArray();
 

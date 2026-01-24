@@ -5,7 +5,7 @@ import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, Lu
 import Link from 'next/link'
 import { User } from 'better-auth';
 import { Topic, TopicComment, PostTopicCommentValidationErrors } from '@/../lib/utils/topics-validation';
-import { addCommentToTopicPost } from '@/../lib/topics-server-actions';
+import { addCommentToTopicPost, updateCommentReactions, updatePostReactions } from '@/../lib/topics-server-actions';
 
 export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: User, postTopic: Topic, postTopicComments?: TopicComment[] }) {
     const [showPostMenu, setShowPostMenu] = useState(false);
@@ -43,15 +43,13 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
         }
     }, [result])
 
-    const handleLikeComment = (id: string) => {
+    const handlePostReaction = async (id: string, reactionType: 'like' | 'dislike') => {
+        await updatePostReactions(id, reactionType);
+    }
 
-    };
-
-    const handleDislikeComment = (id: string) => {
-        // setComments(comments.map(c => 
-        //   c.id === id ? { ...c, dislikes: c.dislikes + 1 } : c
-        // ));
-    };
+    const handleCommentReaction = async (id: string, reactionType: 'like' | 'dislike') => {
+        await updateCommentReactions(id, reactionType);
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -134,14 +132,14 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
 
                                 <div className="flex items-center space-x-6 pt-4 border-t border-gray-200">
                                     <button
-                                        onClick={() => setPostLikes(postTopic.likes + 1)}
+                                        onClick={() => handlePostReaction(postTopic._id, 'like')}
                                         className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
                                     >
                                         <LuThumbsUp size={24} />
                                         <span className="font-medium text-lg">{postTopic.likes}</span>
                                     </button>
                                     <button
-                                        onClick={() => setPostDislikes(postTopic.dislikes + 1)}
+                                        onClick={() => handlePostReaction(postTopic._id, 'dislike')}
                                         className="flex items-center space-x-2 text-gray-600 hover:text-red-600 transition-colors"
                                     >
                                         <LuThumbsDown size={24} />
@@ -229,14 +227,14 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
 
                                         <div className="flex items-center space-x-4">
                                             <button
-                                                onClick={() => handleLikeComment(comment.userId)}
+                                                onClick={() => handleCommentReaction(comment._id, 'like')}
                                                 className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
                                             >
                                                 <LuThumbsUp size={18} />
                                                 <span className="font-medium">{comment.likes}</span>
                                             </button>
                                             <button
-                                                onClick={() => handleDislikeComment(comment.userId)}
+                                                onClick={() => handleCommentReaction(comment._id, 'dislike')}
                                                 className="flex items-center space-x-1 text-gray-600 hover:text-red-600 transition-colors"
                                             >
                                                 <LuThumbsDown size={18} />

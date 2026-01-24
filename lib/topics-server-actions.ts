@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { PostTopicSchema, PostTopicValidationErrors, PostTopicCommentSchema } from './utils/topics-validation'
 import  GetServerSession  from './utils/get-server-session';
 import { getDb } from "@/../lib/mongodb";
-import { ObjectId } from 'mongodb'
+import { Db, ObjectId } from 'mongodb'
 import { TopicComment } from './utils/topics-validation'
 
 type PostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: PostTopicValidationErrors; apiError: string | undefined }
@@ -72,11 +72,16 @@ export async function addCommentToTopicPost(topicId: string, prevState: any, for
     const session = await GetServerSession();
     if(!session) {
         // return unauthorized page to prompt relogin (do later)
+        return {
+            success: false,
+            message: 'User not authenticated',
+            apiError: 'Unauthorized',
+        };
     }
 
     const comments = (await getDb()).collection('comments');
 
-    const result = await comments.insertOne({
+    await comments.insertOne({
         postId: new ObjectId(topicId),
         content: validatedFields.data.content,
         userId: session?.user.id,
@@ -91,6 +96,104 @@ export async function addCommentToTopicPost(topicId: string, prevState: any, for
     return { success: true };
 }
 
+export async function updatePostReactions(targetId: string, reactionType: 'like' | 'dislike') {
+    
+    const session = await GetServerSession();
+    if(!session) {
+        //TODO: Add a redirect to page for unauthorized
+        return;
+    }
+
+    const db = await getDb();
+
+    // Check if posts exists
+    const post = await db.collection('posts').findOne({ _id: new ObjectId(targetId) });
+
+    if(!post) {
+        //TODO: Add a redirect to page for post not found
+    }
+    
+    await handleReactions(db, session.user.id, targetId, 'posts', reactionType);
+    revalidatePath(`/dashboard/topics-board/${targetId.toString()}`);
+}
+
+export async function updateCommentReactions(targetId: string, reactionType: 'like' | 'dislike') {
+    const session = await GetServerSession();
+    if(!session) {
+        //TODO: Add a redirect to page for unauthorized
+        return;
+    }
+
+    const db = await getDb();
+
+    // Check if posts exists
+    const post = await db.collection('comments').findOne({ _id: new ObjectId(targetId) });
+
+    if(!post) {
+        //TODO: Add a redirect to page for post not found
+    }
+    
+    await handleReactions(db, session.user.id, targetId, 'comments', reactionType);
+    revalidatePath(`/dashboard/topics-board/${targetId.toString()}`);
+}
+
+async function handleReactions(db: Db, userId: string, targetId: string, targetType: 'posts' | 'comments', reactionType: 'like' | 'dislike') {
+
+    const userReactions = db.collection('user_reactions');
+    const targetCollection = db.collection(targetType);
+
+    const existingReaction = await userReactions.findOne({ userId, targetId: targetId });
+
+    const objectTargetId = new ObjectId(targetId);
+
+    console.log(existingReaction?.reactionType + ' vs ' + reactionType);
+    console.log(targetId + " " + objectTargetId);
+
+
+    // Remove reaction
+    if(existingReaction?.reactionType === reactionType) {
+        console.log('Removing reaction from ' + targetType);
+        await userReactions.deleteOne({ userId, targetId: targetId });
+        await targetCollection.updateOne(
+            { _id: objectTargetId },
+            { $inc: { [reactionType === 'like' ? 'likes' : 'dislikes']: -1 } }
+        );
+    }
+    // Change reaction
+    else if(existingReaction) {
+        console.log('Changing reaction for '  + targetType);
+        const prevReactionType = existingReaction.reactionType;
+
+        await userReactions.updateOne( 
+            { userId, targetId: targetId },
+            { $set: { reactionType: reactionType, updatedAt: new Date() } }
+        );
+
+        await targetCollection.updateOne(
+            { _id: objectTargetId },
+            { $inc: { 
+                [prevReactionType === 'like' ? 'likes' : 'dislikes']: -1,
+                [reactionType === 'like' ? 'likes' : 'dislikes']: 1
+            }
+        });
+    }
+    // New reaction
+    else {
+        await userReactions.insertOne({
+            userId: userId,
+            targetId: targetId,
+            reactionType: reactionType,
+            targetType: targetType,
+            updatedAt: new Date()
+        });
+        const updateRes = await targetCollection.updateOne(
+            { _id: objectTargetId },
+            { $inc: { [reactionType === 'like' ? 'likes' : 'dislikes']: 1 } }
+        );
+        console.log(targetCollection.collectionName + ' reaction added result: ', updateRes);
+    }
+}
+    
 export async function retrieveTopicById(topicId: string) {
     const posts = (await getDb()).collection('posts');
     return await posts.findOne({ _id: new ObjectId(topicId) });
