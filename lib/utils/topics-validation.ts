@@ -1,12 +1,11 @@
-import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 
-export interface PostTopicValidationErrors {
+export interface TopicPostValidationErrors {
     title?: string[] | undefined,
     content?: string[] | undefined,
 }
 
-export const PostTopicSchema = z.object({
+export const TopicPostSchema = z.object({
     title: z.string().min(10, "Minimum of 10 characters"),
     content: z.string().min(10, "Minimum of 10 characters"),
 });
@@ -23,11 +22,11 @@ export interface Topic {
     dislikes: number;
 }
 
-export interface PostTopicCommentValidationErrors {
+export interface TopicPostCommentValidationErrors {
     content?: string[] | undefined,
 }
 
-export const PostTopicCommentSchema = z.object({
+export const TopicPostCommentSchema = z.object({
     content: z.string().min(5, "Minimum of 5 characters"),
 });
 

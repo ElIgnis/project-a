@@ -3,13 +3,13 @@
 import { useState, useEffect, useActionState } from 'react';
 import { LuUpload, LuX } from 'react-icons/lu';
 import { createTopicPost } from '@/../lib/topics-server-actions';
-import { PostTopicValidationErrors } from '@/../lib/utils/topics-validation';
+import { TopicPostValidationErrors } from '@/../lib/utils/topics-validation';
 import Link from 'next/link'
 import { User } from 'better-auth';
 
 export default function CreateTopic({userData} : { userData: User }) {
 
-  const [validationErrors, setValidationErrors] = useState<PostTopicValidationErrors | null>(null);
+  const [validationErrors, setValidationErrors] = useState<TopicPostValidationErrors | null>(null);
   const [postFailedError, setPostFailedError] = useState<string | undefined>("");
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');

@@ -7,15 +7,12 @@ import Link from 'next/link'
 import { Topic } from '@/../lib/utils/topics-validation';
 
 export default function TopicsBoard({userData, postTopics}: { userData: User, postTopics: Topic[] }) {
-    const [showPostMenu, setShowPostMenu] = useState(false);
-    const [showCommentMenu, setShowCommentMenu] = useState( {} as { [key: string]: boolean } );
-    const [postLikes, setPostLikes] = useState(24);
-    const [postDislikes, setPostDislikes] = useState(3);
-
+    
+    const [showModificationsMenuId, setShowModificationMenuId] = useState("");
     const currentUser = userData.id;
 
-    const toggleCommentMenu = (id: string) => {
-        setShowCommentMenu(prev => ({ ...prev, [id]: !prev[id] }));
+    const toggleModificationMenu = (id: string) => {
+        setShowModificationMenuId(prevId => prevId === id ? "" : id);
     };
 
     return (
@@ -39,21 +36,24 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
                                 {postTopic.userId === currentUser && (
                                     <div className="relative">
                                         <button
-                                            onClick={() => toggleCommentMenu(postTopic._id)}
+                                            onClick={() => toggleModificationMenu(postTopic._id)}
                                             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                                         >
                                             <LuEllipsisVertical size={16} className="text-gray-600" />
                                         </button>
 
-                                        {showCommentMenu[postTopic._id] && (
+                                        {showModificationsMenuId === postTopic._id && (
                                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                                                <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                                                    <LuSquarePen size={14} />
-                                                    <span className="text-sm">Edit Comment</span>
-                                                </button>
+                                                <Link 
+                                                className="w-full text-left px-4 py-2 hover:bg-blue-100 flex items-center space-x-2"
+                                                href={`/dashboard/topics-board/edit-topic/${postTopic._id}`}
+                                                >
+                                                    <LuSquarePen className="stroke-black" size={14} />
+                                                    <span className="text-sm text-black">Edit Post</span>
+                                                </Link>
                                                 <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600">
                                                     <LuTrash2 size={14} />
-                                                    <span className="text-sm">Delete Comment</span>
+                                                    <span className="text-sm">Delete Post</span>
                                                 </button>
                                             </div>
                                         )}

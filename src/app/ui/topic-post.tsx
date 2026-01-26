@@ -1,54 +1,116 @@
 'use client'
 
-import { useState, useEffect, useActionState } from 'react';
-import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, LuSend, LuPencilLine, LuArrowLeft } from 'react-icons/lu';
+import { useState, useRef, useEffect, useActionState } from 'react';
+import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, LuSend, LuArrowLeft } from 'react-icons/lu';
 import Link from 'next/link'
 import { User } from 'better-auth';
-import { Topic, TopicComment, PostTopicCommentValidationErrors } from '@/../lib/utils/topics-validation';
-import { addCommentToTopicPost, updateCommentReactions, updatePostReactions } from '@/../lib/topics-server-actions';
+import { Topic, TopicComment, TopicPostCommentValidationErrors, TopicPostValidationErrors } from '@/../lib/utils/topics-validation';
+import { addCommentToTopicPost, editTopicPostComment, updateTopicPostCommentReactions, updateTopicPostReactions } from '@/../lib/topics-server-actions';
+import { useClickOutsideSingle, useClickOutsideMap } from './utils/ui-utils';
 
 export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: User, postTopic: Topic, postTopicComments?: TopicComment[] }) {
     const [showPostMenu, setShowPostMenu] = useState(false);
-    const [showCommentMenu, setShowCommentMenu] = useState({});
-    const [postLikes, setPostLikes] = useState(24);
-    const [postDislikes, setPostDislikes] = useState(3);
+
+    const [commentMenuId, setCommentMenuId] = useState("");
+    const [showCommentMenu, setShowCommentMenu] = useState(false);
     const [newComment, setNewComment] = useState('');
+    const [editedComment, setEditedComment] = useState('');
+    const [commentToUpdateId, setCommentToUpdateId] = useState(' ');
 
-    const [validationErrors, setValidationErrors] = useState<PostTopicCommentValidationErrors | null>(null);
-    const [postCommentsFailedError, setPostCommentsFailedError] = useState<string | undefined>("");
-    const commentTopicPostWithId = addCommentToTopicPost.bind(null, postTopic._id);
-    const [result, createTopicFormAction, isPending] = useActionState(commentTopicPostWithId, null);
-    const currentUser = userData.id;
+    const [createCommentsValidationError, setCreateCommentsValidationError] = useState<TopicPostCommentValidationErrors | null>(null);
+    const [createCommentsFailedError, setCreateCommentsFailedError] = useState<string | undefined>();
 
+    const [editCommentsValidationError, setEditCommentsValidationError] = useState<TopicPostCommentValidationErrors | null>(null);
+    const [editCommentsFailedError, setEditCommentsFailedError] = useState<string | undefined>("");
 
-    const toggleCommentMenu = (id: string) => {
-        // setShowCommentMenu(prev => ({ ...prev, [id]: !prev[id] }));
-    };
+    const commentTopicPostBindId = addCommentToTopicPost.bind(null, postTopic._id);
+    
+    const [isEditingComment, setIsEditingComment] = useState(false);
+    const [createCommentResult, createCommentFormAction, isCreationPending] = useActionState(commentTopicPostBindId, null);
+    
+    const bindedEditTopicComment = editTopicPostComment.bind(null, commentToUpdateId);
+    const [editCommentResult, editCommentFormAction, isEditingPending] = useActionState(bindedEditTopicComment, null);
 
-    useEffect(() => {
-        if (result && !result.success) {
+    useEffect(()=> {
+        if(createCommentResult && !createCommentResult.success) {
 
             // Server sided errors
-            if (result.apiError) {
-                setPostCommentsFailedError(result.apiError);
+            if(createCommentResult.apiError) {
+                setCreateCommentsFailedError(createCommentResult.apiError);
             }
 
             // Client sided errors
-            else if (result.validationErrors) {
-                setValidationErrors({
-                    content: result.validationErrors.content,
+            else if(createCommentResult.validationErrors) {
+                setCreateCommentsValidationError({
+                    content: createCommentResult.validationErrors.content
                 });
-                setPostCommentsFailedError(result.message);
+                console.log(createCommentResult.validationErrors);
             }
+            setCreateCommentsFailedError(createCommentResult.message);
         }
-    }, [result])
+    }, [createCommentResult]);
+
+    useEffect(()=> {
+        if(editCommentResult && !editCommentResult.success) {
+
+            // Server sided errors
+            if(editCommentResult.apiError) {
+                setEditCommentsFailedError(editCommentResult.apiError);
+            }
+
+            // Client sided errors
+            else if(editCommentResult.validationErrors) {
+                setEditCommentsValidationError(editCommentResult.validationErrors);
+            }
+            setEditCommentsFailedError(editCommentResult.message);
+        }
+        else {
+            handleCancelEditing();
+        }
+    }, [editCommentResult]);
+
+    const menuRef = useRef<HTMLDivElement>(null);   // The dropdown menu for post
+    useClickOutsideSingle(menuRef, () => {setShowPostMenu(false);});
+
+    const commentsMenuButtonRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
+    function getCommentsMenuButtonRefMap() {
+        if(!commentsMenuButtonRefs.current) {
+            commentsMenuButtonRefs.current = new Map<string, HTMLDivElement | null> ();
+        }
+        return commentsMenuButtonRefs.current;
+    }
+    useClickOutsideMap(commentsMenuButtonRefs, commentMenuId, ()=> {
+        setShowCommentMenu(false);
+
+        if(!isEditingComment) {
+            setCommentMenuId("");
+        }
+    })
+
+    const toggleCommentMenu = (id: string) => {
+        setCommentMenuId(prevId => prevId === id ? "" : id);
+        setShowCommentMenu(!showCommentMenu);
+        setCommentToUpdateId(id);
+    };
 
     const handlePostReaction = async (id: string, reactionType: 'like' | 'dislike') => {
-        await updatePostReactions(id, reactionType);
+        await updateTopicPostReactions(id, reactionType);
     }
 
     const handleCommentReaction = async (id: string, reactionType: 'like' | 'dislike') => {
-        await updateCommentReactions(id, reactionType);
+        await updateTopicPostCommentReactions(id, reactionType);
+    }
+
+    const handleEditingComment = () => {
+        setShowCommentMenu(false);
+        setIsEditingComment(true);
+    }
+
+    const handleCancelEditing = () => {
+        setIsEditingComment(false);
+        setEditedComment("");
+        setCommentToUpdateId("");
+        setCommentMenuId("");
     }
 
     return (
@@ -59,10 +121,10 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                     <Link
                         href="/dashboard/topics-board"
                         className="flex text-nowrap w-min justify-center gap-4 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
-                        >
+                    >
                         <LuArrowLeft className="mt-0.5 ml-auto h-5 w-5 text-gray-50" />
                         Back to topics
-                        </Link>
+                    </Link>
                 </div>
             </div>
 
@@ -91,7 +153,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
 
                                     {/* Post Menu (Only for owner) */}
                                     {postTopic.userId === userData.id && (
-                                        <div className="relative">
+                                        <div ref={menuRef} className="relative">
                                             <button
                                                 onClick={() => setShowPostMenu(!showPostMenu)}
                                                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -100,11 +162,14 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                             </button>
 
                                             {showPostMenu && (
-                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                                                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                                                        <LuSquarePen size={16} />
-                                                        <span>Edit Post</span>
-                                                    </button>
+                                                <div  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                                    <Link
+                                                        className="w-full text-left px-4 py-2 hover:bg-blue-100 flex items-center space-x-2"
+                                                        href={`/dashboard/topics-board/edit-topic/${postTopic._id}`}
+                                                    >
+                                                        <LuSquarePen className="stroke-black" size={14} />
+                                                        <span className="text-sm text-black">Edit Post</span>
+                                                    </Link>
                                                     <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600">
                                                         <LuTrash2 size={16} />
                                                         <span>Delete Post</span>
@@ -154,7 +219,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
 
                         {/* Add Comment Section */}
                         <div className="bg-white rounded-lg shadow-md p-4">
-                            <form action={createTopicFormAction}>
+                            <form action={createCommentFormAction}>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Add a Comment</h3>
                                 <div className="flex space-x-3">
                                     <textarea
@@ -165,11 +230,19 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                         name="content"
                                         id="content"
                                         className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none resize-none transition-all  text-gray-900"
+                                        aria-describedby='create-comment-error'
                                     />
+                                </div>
+                                <div id="create-comment-error" aria-live="polite" aria-atomic="true">
+                                    {createCommentsValidationError?.content && createCommentsValidationError.content.map((error: string)=> (
+                                        <p className="mt-2 text-sm text-red-500" key={error}>
+                                            {error}
+                                        </p>
+                                    ))}
                                 </div>
                                 <div className="flex justify-end mt-3">
                                     <button
-                                        disabled={!newComment.trim()}
+                                        // disabled={!newComment.trim()}
                                         className="flex items-center space-x-2 px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                                     >
                                         <LuSend size={18} />
@@ -194,28 +267,36 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                     year: 'numeric',
                                                     month: 'long',
                                                     day: 'numeric'
-                                            })}</span>
+                                                })}</span>
                                             </div>
 
                                             {/* Comment Menu (Only for owner) */}
                                             {comment.userId === userData.id && (
-                                                <div className="relative">
-                                                    <button
-                                                        onClick={() => toggleCommentMenu(comment.userId)}
+                                                <div ref={(node)=>{
+                                                    const map = getCommentsMenuButtonRefMap();
+                                                    map.set(comment._id, node);
+
+                                                    return () => {map.delete(comment._id);};
+                                                    }} className="relative">
+                                                    {!isEditingComment && <button
+                                                        onClick={() => toggleCommentMenu(comment._id)}
                                                         className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                                                     >
                                                         <LuEllipsisVertical size={16} className="text-gray-600" />
-                                                    </button>
+                                                    </button>}
 
-                                                    {showCommentMenu[comment.id] && (
+                                                    {commentMenuId === comment._id && showCommentMenu && !isEditingComment&& (
                                                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                                                            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                                                                <LuSquarePen size={14} />
-                                                                <span className="text-sm">Edit Comment</span>
+                                                            <button
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                                                            onClick={()=> handleEditingComment()}
+                                                            >
+                                                                <LuSquarePen className="stroke-black" size={14} />
+                                                                <span className="text-sm  text-black">Edit Comment</span>
                                                             </button>
                                                             <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600">
                                                                 <LuTrash2 size={14} />
-                                                                <span className="text-sm">Delete Comment</span>
+                                                                <span className="text-sm  text-black">Delete Comment</span>
                                                             </button>
                                                         </div>
                                                     )}
@@ -223,8 +304,43 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                             )}
                                         </div>
 
-                                        <p className="text-gray-800 mb-3 leading-relaxed">{comment.content}</p>
-
+                                        {commentMenuId === comment._id && isEditingComment ? 
+                                            <div className="flex space-x-4">
+                                                <form action={editCommentFormAction} className="w-full flex flex-col" >
+                                                    <textarea
+                                                        value={editedComment}
+                                                        onChange={(e) => setEditedComment(e.target.value)}
+                                                        placeholder="Share your thoughts..."
+                                                        rows={3}
+                                                        name="content"
+                                                        id="content"
+                                                        className="px-4 py-4 mb-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none resize-none transition-all  text-gray-900"
+                                                        aria-describedby='edit-comment-error'
+                                                    />
+                                                    <div className="flex flex-row justify-between">
+                                                        <div id="edit-comment-error" aria-live="polite" aria-atomic="true">
+                                                            {editCommentsValidationError?.content && editCommentsValidationError.content.map((error: string)=> (
+                                                                <p className="mt-2 text-sm text-red-500" key={error}>
+                                                                    {error}
+                                                                </p>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex justify-end gap-8">
+                                                            <button type="button" onClick={()=> handleCancelEditing()}className="self-end flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 transition-colors">
+                                                                Cancel
+                                                            </button>
+                                                            
+                                                            <button type="submit" className="self-end flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-slate-700 transition-colors">
+                                                                <LuSquarePen className="stroke-white" size={14} />
+                                                                <span className="text-md text-white">Edit Comment</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div> :
+                                            <p className="text-gray-800 mb-3 leading-relaxed">{comment.content}</p>
+                                        }
+                                        
                                         <div className="flex items-center space-x-4">
                                             <button
                                                 onClick={() => handleCommentReaction(comment._id, 'like')}

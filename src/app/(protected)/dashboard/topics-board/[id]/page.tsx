@@ -1,4 +1,4 @@
-import { retrieveCommentsByTopicId, retrieveTopicById } from '@/../lib/topics-server-actions';
+import { retrieveCommentsByTopicPostId, retrieveTopicPostById } from '@/../lib/topics-server-actions';
 import GetServerSession from '@/../lib/utils/get-server-session';
 import TopicPost from '@/app/ui/topic-post';
 import { Topic, TopicComment } from '@/../lib/utils/topics-validation';
@@ -11,8 +11,8 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         return;
 
     const { id } = await params;
-    const topicPost = await retrieveTopicById(id);
-    const topicPostComments = await retrieveCommentsByTopicId(id);
+    const topicPost = await retrieveTopicPostById(id);
+    const topicPostComments = await retrieveCommentsByTopicPostId(id);
 
     if (!topicPost) {
         return <div>Post not found</div>;

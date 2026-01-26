@@ -1,5 +1,5 @@
 import CreateTopic from "@/app/ui/create-topic";
-import GetServerSession from "../../../../../../lib/utils/get-server-session";
+import GetServerSession from "@/../lib/utils/get-server-session";
 
 export default async function CreateTopicPage() {
 

@@ -34,7 +34,7 @@ export default function LoginForm() {
           setPasswordInput("");
       }
     }
-  }, [result])
+  }, [result]);
 
   return (
     <form action={loginFormAction} className="space-y-3">
