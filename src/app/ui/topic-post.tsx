@@ -4,8 +4,14 @@ import { useState, useRef, useEffect, useActionState } from 'react';
 import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, LuSend, LuArrowLeft } from 'react-icons/lu';
 import Link from 'next/link'
 import { User } from 'better-auth';
-import { Topic, TopicComment, TopicPostCommentValidationErrors, TopicPostValidationErrors } from '@/../lib/utils/topics-validation';
-import { addCommentToTopicPost, editTopicPostComment, updateTopicPostCommentReactions, updateTopicPostReactions } from '@/../lib/topics-server-actions';
+import { Topic, TopicComment, TopicPostCommentValidationErrors } from '@/../lib/utils/topics-validation';
+import { 
+    addCommentToTopicPost, 
+    editTopicPostComment, 
+    updateTopicPostCommentReactions, 
+    updateTopicPostReactions, 
+    deleteTopicPost, 
+    deleteTopicPostComment } from '@/../lib/topics-server-actions';
 import { useClickOutsideSingle, useClickOutsideMap } from './utils/ui-utils';
 
 export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: User, postTopic: Topic, postTopicComments?: TopicComment[] }) {
@@ -48,6 +54,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
             }
             setCreateCommentsFailedError(createCommentResult.message);
         }
+        setNewComment("");
     }, [createCommentResult]);
 
     useEffect(()=> {
@@ -170,9 +177,12 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                         <LuSquarePen className="stroke-black" size={14} />
                                                         <span className="text-sm text-black">Edit Post</span>
                                                     </Link>
-                                                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600">
+                                                    <button 
+                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                                                    onClick={()=>deleteTopicPost(postTopic._id)}
+                                                    >
                                                         <LuTrash2 size={16} />
-                                                        <span>Delete Post</span>
+                                                        <span className="text-sm">Delete Post</span>
                                                     </button>
                                                 </div>
                                             )}
@@ -242,7 +252,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                 </div>
                                 <div className="flex justify-end mt-3">
                                     <button
-                                        // disabled={!newComment.trim()}
+                                        disabled={!newComment.trim()}
                                         className="flex items-center space-x-2 px-4 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                                     >
                                         <LuSend size={18} />
@@ -294,7 +304,10 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                                 <LuSquarePen className="stroke-black" size={14} />
                                                                 <span className="text-sm  text-black">Edit Comment</span>
                                                             </button>
-                                                            <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600">
+                                                            <button 
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                                                            onClick={()=>deleteTopicPostComment(postTopic._id, comment._id)}
+                                                            >
                                                                 <LuTrash2 size={14} />
                                                                 <span className="text-sm  text-black">Delete Comment</span>
                                                             </button>

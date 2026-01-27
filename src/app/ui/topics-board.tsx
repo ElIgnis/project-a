@@ -5,6 +5,7 @@ import { LuThumbsUp , LuThumbsDown, LuEllipsisVertical , LuSquarePen , LuTrash2,
 import { User } from 'better-auth';
 import Link from 'next/link'
 import { Topic } from '@/../lib/utils/topics-validation';
+import { deleteTopicPost } from '@/../lib/topics-server-actions'
 
 export default function TopicsBoard({userData, postTopics}: { userData: User, postTopics: Topic[] }) {
     
@@ -51,7 +52,10 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
                                                     <LuSquarePen className="stroke-black" size={14} />
                                                     <span className="text-sm text-black">Edit Post</span>
                                                 </Link>
-                                                <button className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600">
+                                                <button 
+                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                                                onClick={()=> deleteTopicPost(postTopic._id)}
+                                                >
                                                     <LuTrash2 size={14} />
                                                     <span className="text-sm">Delete Post</span>
                                                 </button>

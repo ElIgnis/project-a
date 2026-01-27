@@ -99,6 +99,35 @@ async function handleTopicPostUpdate(targetId: string, formData: FormData) {
     }
 }
 
+type DeleteTopicPostResult = { success: true } | { success: false; apiError: string | undefined; }
+
+export async function deleteTopicPost(topicId: string) : Promise<DeleteTopicPostResult> {
+    const session = await GetServerSession();
+    if (!session) {
+        // return unauthorized page to prompt relogin (do later)
+        return {
+            success: false,
+            apiError: "Unauthorized",
+        };
+    }
+
+    const topics = (await getDb()).collection("posts");
+
+    try {
+        topics.deleteOne(
+            { _id: new ObjectId(topicId) },
+        )
+    } catch (e) {
+        return {
+            success: false,
+            apiError: "Write deletion failed"
+        }
+    }
+
+    revalidatePath('/dashboard/topics-board');
+    redirect('/dashboard/topics-board');
+}
+
 type PostTopicCommentResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostCommentValidationErrors; apiError: string | undefined }
 
 export async function addCommentToTopicPost(topicId: string, prevState: any, formData: FormData): Promise<PostTopicCommentResult> {
@@ -187,6 +216,35 @@ async function handleTopicPostCommentUpdate(topicId: string, updateType: 'create
     }
 
     revalidatePath(`/dashboard/topics-board/${topicId.toString()}`);
+}
+
+type DeleteTopicPostCommentResult = { success: true } | { success: false; apiError: string | undefined; }
+
+export async function deleteTopicPostComment(postId: string, commentId: string) : Promise<DeleteTopicPostCommentResult> {
+    const session = await GetServerSession();
+    if (!session) {
+        // return unauthorized page to prompt relogin (do later)
+        return {
+            success: false,
+            apiError: "Unauthorized",
+        };
+    }
+
+    const topics = (await getDb()).collection("comments");
+
+    try {
+        topics.deleteOne(
+            { _id: new ObjectId(commentId) },
+        )
+    } catch (e) {
+        return {
+            success: false,
+            apiError: "Write deletion failed"
+        }
+    }
+
+    revalidatePath(`/dashboard/topics-board/${postId}`);
+    redirect(`/dashboard/topics-board/${postId}`);
 }
 
 export async function updateTopicPostReactions(targetId: string, reactionType: 'like' | 'dislike') {
