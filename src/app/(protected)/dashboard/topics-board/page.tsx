@@ -1,6 +1,6 @@
 import TopicsBoard from '@/app/ui/topics-board'
 import Navbar from '@/app/ui/navbars/navbar';
-import GetServerSession from '@/../lib/utils/get-server-session';
+import { GetServerSession }  from '@/../lib/utils/get-server-session';
 import { retrieveAllTopicPosts } from '@/../lib/topics-server-actions';
 import { Topic } from '@/../lib/utils/topics-validation';
 import GetUsernamesByIds from '@/../lib/utils/db-helper-functions';

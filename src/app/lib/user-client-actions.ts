@@ -6,13 +6,13 @@ import { z } from 'zod';
 
 type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
 
-export async function signup(prevState: any, formData: FormData): Promise<SignUpResult> {
+export async function emailSignup(username: string, email:string, password: string, confirmPassword: string): Promise<SignUpResult> {
 
   const validatedFields = SignUpFormSchema.safeParse({
-    name: formData.get("username"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword")
+    name: username,
+    email: email,
+    password: password,
+    confirmPassword: confirmPassword
   });
 
   if (!validatedFields.success) {
@@ -53,11 +53,11 @@ export async function signup(prevState: any, formData: FormData): Promise<SignUp
 
 type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
 
-export async function login(prevState: any, formData: FormData): Promise<LoginResult> {
+export async function emailLogin(inputEmail: string, inputPassword: string): Promise<LoginResult> {
 
   const validatedFields = LoginFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password")
+    email: inputEmail,
+    password: inputPassword
   });
 
   if (!validatedFields.success) {

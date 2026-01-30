@@ -2,7 +2,7 @@
 
 import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft, LuUserRound } from "react-icons/lu";
 import { Button } from '@/app/ui/button';
-import { signup } from '@/app/lib/user-client-actions'
+import { emailSignup } from '@/app/lib/user-client-actions'
 import { SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
 import { useState, useEffect, useActionState } from 'react';
 import { useRouter } from 'next/navigation'
@@ -11,14 +11,18 @@ import Link from 'next/link'
 export default function SignupForm() {
 
   const [validationErrors, setValidationErrors] = useState<SignUpValidationErrors | null>(null);
-  const [passwordInput, setPasswordInput] = useState("");
-  const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPasswordInput] = useState("");
+  const [confirmPassword, setConfirmPasswordInput] = useState("");
   const [signupFailedError, setSignupFailedError] = useState<string | undefined>("");
 
   const router = useRouter();
-  const [result, signupFormAction, isPending] = useActionState(signup, null);
 
-  useEffect(() => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const result = await emailSignup(username, email, password, confirmPassword);
+
     if (result) {
       if (!result.success) {
 
@@ -45,10 +49,10 @@ export default function SignupForm() {
       // Redirect if no issues
       router.push('/dashboard');
     }
-  }, [result]);
+  }
 
   return (
-    <form action={signupFormAction} className="space-y-3">
+    <form onSubmit={(e) => handleSignup(e)} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <Link
           href="/"
@@ -71,15 +75,17 @@ export default function SignupForm() {
               </label>
               <div className="relative">
                 <input
-                  className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-sm outline-2 text-gray-900 placeholder:text-gray-500"
+                  className="peer block w-full rounded-md border border-gray-200 py-2.25 pl-10 text-sm outline-2 text-gray-900 placeholder:text-gray-500"
                   id="username"
                   type="text"
                   name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   required
                   aria-describedby='name-error'
                 />
-                <LuUserRound className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+                <LuUserRound className="pointer-events-none absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
               </div>
               <div id="name-error" aria-live="polite" aria-atomic="true">
                 {validationErrors?.name &&
@@ -104,6 +110,8 @@ export default function SignupForm() {
                   id="email"
                   type="email"
                   name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
                   required
                   aria-describedby='email-error'
@@ -136,7 +144,7 @@ export default function SignupForm() {
                   placeholder="Enter password"
                   required
                   minLength={8}
-                  value={passwordInput}
+                  value={password}
                   onChange={e => { setPasswordInput(e.target.value) }}
                   aria-describedby='password-error'
                 />
@@ -166,7 +174,7 @@ export default function SignupForm() {
                   type="password"
                   name="confirmPassword"
                   placeholder="Re-enter your password"
-                  value={confirmPasswordInput}
+                  value={confirmPassword}
                   onChange={e => { setConfirmPasswordInput(e.target.value) }}
                   minLength={8}
                   required

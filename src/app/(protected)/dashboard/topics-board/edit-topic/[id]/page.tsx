@@ -1,5 +1,5 @@
 import EditTopic from "@/app/ui/edit-topic";
-import GetServerSession from "@/../lib/utils/get-server-session";
+import { GetServerSession }  from '@/../lib/utils/get-server-session';
 import { retrieveTopicPostById } from "@/../lib/topics-server-actions";
 import { Topic } from "@/../lib/utils/topics-validation";
 

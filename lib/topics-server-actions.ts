@@ -5,10 +5,9 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod';
 
 import { TopicPostSchema, TopicPostValidationErrors, TopicPostCommentSchema, TopicPostCommentValidationErrors } from './utils/topics-validation'
-import GetServerSession from './utils/get-server-session';
+import { GetServerSession }  from './utils/get-server-session';
 import { getDb } from "@/../lib/mongodb";
 import { Db, ObjectId } from 'mongodb'
-import { TopicComment } from './utils/topics-validation'
 
 type PostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostValidationErrors; apiError: string | undefined }
 

@@ -1,5 +1,5 @@
 import { retrieveCommentsByTopicPostId, retrieveTopicPostById } from '@/../lib/topics-server-actions';
-import GetServerSession from '@/../lib/utils/get-server-session';
+import { GetServerSession }  from '@/../lib/utils/get-server-session';
 import TopicPost from '@/app/ui/topic-post';
 import { Topic, TopicComment } from '@/../lib/utils/topics-validation';
 import GetUsernamesByIds from '@/../lib/utils/db-helper-functions';
