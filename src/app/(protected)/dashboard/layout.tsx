@@ -1,7 +1,7 @@
 ﻿import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { headers } from 'next/headers'
-import { auth } from '@/../auth'
+import { auth } from '@/app/lib/auth'
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {

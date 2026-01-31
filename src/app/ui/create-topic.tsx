@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react';
-import { createTopicPost } from '@/../lib/topics-server-actions';
-import { TopicPostValidationErrors } from '@/../lib/utils/topics-validation';
+import { createTopicPost } from '@/app/lib/topics-server-actions';
+import { TopicPostValidationErrors } from '@/app/lib/utils/topics-validation';
 import Link from 'next/link'
 import { UserData } from '@/types/user-interfaces'
 

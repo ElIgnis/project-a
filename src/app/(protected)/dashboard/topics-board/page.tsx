@@ -1,9 +1,9 @@
 import TopicsBoard from '@/app/ui/topics-board'
 import Navbar from '@/app/ui/navbars/navbar';
-import { GetServerSession } from '@/../lib/utils/get-server-session';
-import { retrieveAllTopicPosts } from '@/../lib/topics-server-actions';
-import { Topic } from '@/../lib/utils/topics-validation';
-import GetUsernamesByIds from '@/../lib/utils/db-helper-functions';
+import { GetServerSession } from '@/app/lib/utils/get-server-session';
+import { retrieveAllTopicPosts } from '@/app/lib/topics-server-actions';
+import { Topic } from '@/app/lib/utils/topics-validation';
+import GetUsernamesByIds from '@/app/lib/utils/db-helper-functions';
 import { UserData } from '@/types/user-interfaces'
 
 export default async function TopicsBoardPage() {

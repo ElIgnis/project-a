@@ -3,7 +3,7 @@
 import { LuAtSign, LuKey, LuArrowRight, LuArrowLeft, LuUserRound } from "react-icons/lu";
 import { Button } from '@/app/ui/button';
 import { emailSignup } from '@/app/lib/user-client-actions'
-import { SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
+import { SignUpValidationErrors } from '../lib/utils/user-form-validation'
 import { useState, useEffect, useActionState } from 'react';
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'

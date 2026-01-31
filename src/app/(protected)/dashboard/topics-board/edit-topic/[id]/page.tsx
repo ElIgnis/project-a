@@ -1,7 +1,7 @@
 import EditTopic from "@/app/ui/edit-topic";
-import { GetServerSession }  from '@/../lib/utils/get-server-session';
-import { retrieveTopicPostById } from "@/../lib/topics-server-actions";
-import { Topic } from "@/../lib/utils/topics-validation";
+import { GetServerSession }  from '@/app/lib/utils/get-server-session';
+import { retrieveTopicPostById } from "@/app/lib/topics-server-actions";
+import { Topic } from "@/app/lib/utils/topics-validation";
 import { UserData } from '@/types/user-interfaces'
 
 export default async function EditTopicPage({ params }: { params: { id: string } }) {

@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { LuThumbsUp , LuThumbsDown, LuEllipsisVertical , LuSquarePen , LuTrash2, LuPencilLine, LuArrowRight } from 'react-icons/lu';
 import { UserData } from '@/types/user-interfaces'
 import Link from 'next/link'
-import { Topic } from '@/../lib/utils/topics-validation';
-import { deleteTopicPost } from '@/../lib/topics-server-actions'
+import { Topic } from '@/app/lib/utils/topics-validation';
+import { deleteTopicPost } from '@/app/lib/topics-server-actions'
 
 export default function TopicsBoard({userData, postTopics}: { userData: UserData, postTopics: Topic[] }) {
     

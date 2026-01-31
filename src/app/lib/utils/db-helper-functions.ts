@@ -1,4 +1,4 @@
-import { getDb } from "@/../lib/mongodb";
+import { getDb } from "@/app/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 export default async function GetUsernamesByIds(userIds: string[]): Promise<Map<string, string>> {

@@ -1,8 +1,8 @@
-import { retrieveCommentsByTopicPostId, retrieveTopicPostById } from '@/../lib/topics-server-actions';
-import { GetServerSession }  from '@/../lib/utils/get-server-session';
+import { retrieveCommentsByTopicPostId, retrieveTopicPostById } from '@/app/lib/topics-server-actions';
+import { GetServerSession }  from '@/app/lib/utils/get-server-session';
 import TopicPost from '@/app/ui/topic-post';
-import { Topic, TopicComment } from '@/../lib/utils/topics-validation';
-import GetUsernamesByIds from '@/../lib/utils/db-helper-functions';
+import { Topic, TopicComment } from '@/app/lib/utils/topics-validation';
+import GetUsernamesByIds from '@/app/lib/utils/db-helper-functions';
 import { UserData } from '@/types/user-interfaces'
 
 export default async function PostPage({ params }: { params: { id: string } }) {
