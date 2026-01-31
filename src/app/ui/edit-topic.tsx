@@ -5,10 +5,10 @@ import { LuUpload, LuX } from 'react-icons/lu';
 import { editTopicPost } from '@/../lib/topics-server-actions';
 import { TopicPostValidationErrors, Topic } from '@/../lib/utils/topics-validation';
 import Link from 'next/link'
-import { User } from 'better-auth';
+import { UserData } from '@/types/user-interfaces'
 import { useRouter } from 'next/navigation';
 
-export default function CreateTopic({ userData, postTopic }: { userData: User, postTopic: Topic }) {
+export default function CreateTopic({ userData, postTopic }: { userData: UserData, postTopic: Topic }) {
 
     const [validationErrors, setValidationErrors] = useState<TopicPostValidationErrors | null>(null);
     const [postFailedError, setPostFailedError] = useState<string | undefined>("");
