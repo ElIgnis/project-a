@@ -56,13 +56,13 @@ export default function SignupForm() {
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <Link
           href="/"
-          className="flex w-min justify-center gap-4 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+          className="flex w-min justify-center gap-x-2 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
         >
           <LuArrowLeft className="ml-auto h-6 w-6 text-gray-50" />
           Back
         </Link>
         <div className="justify-items-center">
-          <h1 className="mb-3 text-2xl text-gray-900">
+          <h1 className="mb-3 font-bold text-2xl text-gray-900">
             Account Sign Up
           </h1>
           <div className="w-3/6 min-w-96 max-w-2/12">
@@ -194,7 +194,7 @@ export default function SignupForm() {
 
           </div>
           <input type="hidden" name="redirectTo" />
-          <Button className="mt-4 w-min gap-4 text-nowrap">
+          <Button className="mt-4 w-min gap-x-2 text-nowrap">
             Sign Up <LuArrowRight className="ml-auto h-6 w-6 text-gray-50" />
           </Button>
 

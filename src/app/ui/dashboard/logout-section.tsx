@@ -9,7 +9,7 @@ export function LogoutSection() {
     return (
         <div>
             <button 
-            className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-blue-900 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3"
+            className="flex h-12 w-full grow items-center justify-center gap-x-2 rounded-md bg-blue-900 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3"
             onClick={logout}
             >
             <div>Logout</div>

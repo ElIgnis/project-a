@@ -94,11 +94,18 @@ export async function emailLogin(inputEmail: string, inputPassword: string): Pro
   return { success: true };
 }
 
+export async function googleLogin() {
+  await authClient.signIn.social({
+    provider: "google",
+    callbackURL: "/dashboard"
+  });
+}
+
 export async function logout() {
   
   try {
     await authClient.signOut();
-    window.location.href = "/login";
+    window.location.href = "/";
   } catch (e) {
     throw new Error("Logout Failure" + e);
   }

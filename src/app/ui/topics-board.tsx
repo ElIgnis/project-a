@@ -30,7 +30,11 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
                                 <div className="flex items-center text-sm text-gray-600">
                                     <span className="font-medium text-gray-900">{postTopic.username}</span>
                                     <span className="mx-2">•</span>
-                                    <span>Insert Date here</span>
+                                    <span>{new Date(postTopic.createdAt).toLocaleString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}</span>
                                 </div>
 
                                 {/* Topic Edit Menu (Only for owner) */}
@@ -94,7 +98,7 @@ export default function TopicsBoard({userData, postTopics}: { userData: User, po
             <div className= "flex w-full justify-center">
                 <Link
                 href="/dashboard/topics-board/create-topic"
-                className="flex w-min text-nowrap justify-center gap-4 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+                className="flex w-min text-nowrap justify-center gap-x-2 self-start rounded-lg bg-blue-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
                 >
                     Create Topic <LuPencilLine  className="mt-0.5 ml-auto h-5 w-5 text-gray-50" /> 
                 </Link>
