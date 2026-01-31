@@ -19,6 +19,7 @@
 
 # production
 /build
+.indexes_created
 
 # misc
 .DS_Store

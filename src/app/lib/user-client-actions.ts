@@ -1,24 +1,28 @@
 'use client'
 
 import { authClient } from '@/../lib/auth-client'
-import { SignUpFormSchema, LoginFormSchema } from '../../../lib/utils/user-form-validation'
+import { SignUpFormSchema, LoginFormSchema, LoginValidationErrors, SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
 import { z } from 'zod';
 
-export async function signup(formData: FormData) {
+type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
+
+export async function emailSignup(username: string, email:string, password: string, confirmPassword: string): Promise<SignUpResult> {
 
   const validatedFields = SignUpFormSchema.safeParse({
-    name: formData.get("username"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword")
+    name: username,
+    email: email,
+    password: password,
+    confirmPassword: confirmPassword
   });
 
   if (!validatedFields.success) {
     const flattenedErrors = z.flattenError(validatedFields.error);
 
     return {
+      success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing Fields, Sign up failed.',
+      message: 'Missing or incomplete fields, sign up failed.',
+      apiError: undefined
     }
   }
   
@@ -40,22 +44,30 @@ export async function signup(formData: FormData) {
     },
   });
   
-  return { data, error }
+  if(error) {
+    return { success: false, message: undefined, apiError: error.message }
+  }
+  
+  return { success: true };
 }
 
-export async function login(formData: FormData) {
+type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
+
+export async function emailLogin(inputEmail: string, inputPassword: string): Promise<LoginResult> {
 
   const validatedFields = LoginFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password")
+    email: inputEmail,
+    password: inputPassword
   });
 
   if (!validatedFields.success) {
     const flattenedErrors = z.flattenError(validatedFields.error);
 
     return {
+      success: false,
       validationErrors: flattenedErrors.fieldErrors,
-      message: 'Missing or incomplete fields, Login failed.',
+      message: 'Missing or incomplete fields, login failed.',
+      apiError: undefined
     }
   }
 
@@ -74,15 +86,26 @@ export async function login(formData: FormData) {
       // display the error message
     },
   });
+
+  if(error) {
+    return { success: false, message: undefined, apiError: error.message }
+  }
   
-  return { data, error };
+  return { success: true };
+}
+
+export async function googleLogin() {
+  await authClient.signIn.social({
+    provider: "google",
+    callbackURL: "/dashboard"
+  });
 }
 
 export async function logout() {
   
   try {
     await authClient.signOut();
-    window.location.href = "/login";
+    window.location.href = "/";
   } catch (e) {
     throw new Error("Logout Failure" + e);
   }
