@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react';
-import { LuUpload, LuX } from 'react-icons/lu';
 import { createTopicPost } from '@/../lib/topics-server-actions';
 import { TopicPostValidationErrors } from '@/../lib/utils/topics-validation';
 import Link from 'next/link'
-import { User } from 'better-auth';
+import { UserData } from '@/types/user-interfaces'
 
-export default function CreateTopic({userData} : { userData: User }) {
+export default function CreateTopic({userData} : { userData: UserData }) {
 
   const [validationErrors, setValidationErrors] = useState<TopicPostValidationErrors | null>(null);
   const [postFailedError, setPostFailedError] = useState<string | undefined>("");

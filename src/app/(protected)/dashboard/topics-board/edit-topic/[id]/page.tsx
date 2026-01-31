@@ -2,6 +2,7 @@ import EditTopic from "@/app/ui/edit-topic";
 import { GetServerSession }  from '@/../lib/utils/get-server-session';
 import { retrieveTopicPostById } from "@/../lib/topics-server-actions";
 import { Topic } from "@/../lib/utils/topics-validation";
+import { UserData } from '@/types/user-interfaces'
 
 export default async function EditTopicPage({ params }: { params: { id: string } }) {
 
@@ -28,9 +29,13 @@ export default async function EditTopicPage({ params }: { params: { id: string }
         dislikes: topicPost.dislikes,
     }
 
+    const userData : UserData = {
+        ...session.user
+    };
+
     return (
         <>
-            <EditTopic userData={session.user} postTopic={parsedTopic} />
+            <EditTopic userData={userData} postTopic={parsedTopic} />
         </>
     );
 }
