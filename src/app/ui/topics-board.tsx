@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { LuThumbsUp , LuThumbsDown, LuEllipsisVertical , LuSquarePen , LuTrash2, LuPencilLine, LuArrowRight } from 'react-icons/lu';
-import { User } from 'better-auth';
+import { UserData } from '@/types/user-interfaces'
 import Link from 'next/link'
 import { Topic } from '@/../lib/utils/topics-validation';
 import { deleteTopicPost } from '@/../lib/topics-server-actions'
 
-export default function TopicsBoard({userData, postTopics}: { userData: User, postTopics: Topic[] }) {
+export default function TopicsBoard({userData, postTopics}: { userData: UserData, postTopics: Topic[] }) {
     
     const [showModificationsMenuId, setShowModificationMenuId] = useState("");
     const currentUser = userData.id;
