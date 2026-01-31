@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useActionState } from 'react';
 import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, LuSend, LuArrowLeft } from 'react-icons/lu';
 import Link from 'next/link'
-import { User } from 'better-auth';
+import { UserData } from '@/types/user-interfaces'
 import { Topic, TopicComment, TopicPostCommentValidationErrors } from '@/../lib/utils/topics-validation';
 import { 
     addCommentToTopicPost, 
@@ -14,7 +14,7 @@ import {
     deleteTopicPostComment } from '@/../lib/topics-server-actions';
 import { useClickOutsideSingle, useClickOutsideMap } from './utils/ui-utils';
 
-export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: User, postTopic: Topic, postTopicComments?: TopicComment[] }) {
+export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: UserData, postTopic: Topic, postTopicComments?: TopicComment[] }) {
     const [showPostMenu, setShowPostMenu] = useState(false);
 
     const [commentMenuId, setCommentMenuId] = useState("");
