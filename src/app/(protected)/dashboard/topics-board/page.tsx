@@ -1,9 +1,10 @@
 import TopicsBoard from '@/app/ui/topics-board'
 import Navbar from '@/app/ui/navbars/navbar';
-import { GetServerSession }  from '@/../lib/utils/get-server-session';
+import { GetServerSession } from '@/../lib/utils/get-server-session';
 import { retrieveAllTopicPosts } from '@/../lib/topics-server-actions';
 import { Topic } from '@/../lib/utils/topics-validation';
 import GetUsernamesByIds from '@/../lib/utils/db-helper-functions';
+import { UserData } from '@/types/user-interfaces'
 
 export default async function TopicsBoardPage() {
 
@@ -27,10 +28,14 @@ export default async function TopicsBoardPage() {
     comments: topic.comments
   }));
 
+  const userData : UserData = {
+        ...session.user
+    };
+
   return (
     <>
       <Navbar />
-      <TopicsBoard userData={session.user} postTopics={parsedTopics} />
+      <TopicsBoard userData={userData} postTopics={parsedTopics} />
     </>
   );
 }

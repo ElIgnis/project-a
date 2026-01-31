@@ -3,6 +3,7 @@ import { GetServerSession }  from '@/../lib/utils/get-server-session';
 import TopicPost from '@/app/ui/topic-post';
 import { Topic, TopicComment } from '@/../lib/utils/topics-validation';
 import GetUsernamesByIds from '@/../lib/utils/db-helper-functions';
+import { UserData } from '@/types/user-interfaces'
 
 export default async function PostPage({ params }: { params: { id: string } }) {
 
@@ -44,7 +45,11 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         lastEditedAt: comment.lastEditedAt.toISOString(),
     }));
 
+    const userData : UserData = {
+        ...session.user
+    };
+
     return (
-        <TopicPost userData={session.user} postTopic={parsedTopic} postTopicComments={parsedTopicComments} />
+        <TopicPost userData={userData} postTopic={parsedTopic} postTopicComments={parsedTopicComments} />
     );
 }
