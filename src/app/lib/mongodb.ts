@@ -1,10 +1,5 @@
 import { CreateIndexesOptions, IndexSpecification, MongoClient, type Db } from "mongodb";
 
-import fs from 'fs';
-import path from 'path';
-
-const INDEXES_FLAG_FILE = path.join(process.cwd(), '.indexes_created');
-
 if (!process.env.MONGODB_URI) {
     throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
@@ -13,12 +8,12 @@ const uri = process.env.MONGODB_URI;
 const options = { appName: "atlas-purple-yacht" };
 
 let clientPromise: Promise<MongoClient>;
+let indexesCreated = false; // Use in-memory flag instead
 
 if (process.env.NODE_ENV === "development") {
-    // In development mode, use a global variable so that the value
-    // is preserved across module reloads caused by HMR (Hot Module Replacement).
     const globalWithMongo = global as typeof globalThis & {
         _mongoClientPromise?: Promise<MongoClient>;
+        _indexesCreated?: boolean;
     };
 
     if (!globalWithMongo._mongoClientPromise) {
@@ -26,31 +21,33 @@ if (process.env.NODE_ENV === "development") {
         globalWithMongo._mongoClientPromise = client.connect();
     }
     clientPromise = globalWithMongo._mongoClientPromise;
+    indexesCreated = globalWithMongo._indexesCreated || false;
 } else {
-    // In production mode, it's best to not use a global variable.
     const client = new MongoClient(uri, options);
     clientPromise = client.connect();
 }
 
-// Export a module-scoped MongoClient. By doing this in a
-// separate module, the client can be shared across functions.
-
 export async function getDb(): Promise<Db> {
-
     const client = await clientPromise;
     const db = client.db();
 
-    
-    if(!fs.existsSync(INDEXES_FLAG_FILE)) {        
+    // Only create indexes once per instance lifetime
+    if (!indexesCreated) {
         await ensureIndexesCreated(db);
-        fs.writeFileSync(INDEXES_FLAG_FILE, 'Indexes created');
+        indexesCreated = true;
+        
+        if (process.env.NODE_ENV === "development") {
+            const globalWithMongo = global as typeof globalThis & {
+                _indexesCreated?: boolean;
+            };
+            globalWithMongo._indexesCreated = true;
+        }
     }
 
     return db;
 }
 
 async function ensureIndexesCreated(db: Db) {
-
     interface IndexConfig {
         collection: string;
         indexes: Array<{key: IndexSpecification; options: CreateIndexesOptions}>;
