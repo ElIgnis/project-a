@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { auth } from "../../auth";
+import { auth } from "@/app/lib/auth";
 import { cache } from "react";
 
 export const GetServerSession = cache(async () => {

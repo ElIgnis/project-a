@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { Button } from '@/app/ui/button';
 import { emailLogin, googleLogin } from '@/app/lib/user-client-actions'
 import { useState } from 'react';
-import { LoginValidationErrors } from '@/../lib/utils/user-form-validation'
+import { LoginValidationErrors } from '@/app/lib/utils/user-form-validation'
 import Link from 'next/link'
 
 export default function LoginForm() {

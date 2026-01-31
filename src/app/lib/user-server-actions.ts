@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@/../auth'
+import { auth } from '@/app/lib/auth'
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'

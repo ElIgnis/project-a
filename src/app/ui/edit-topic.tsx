@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useActionState } from 'react';
 import { LuUpload, LuX } from 'react-icons/lu';
-import { editTopicPost } from '@/../lib/topics-server-actions';
-import { TopicPostValidationErrors, Topic } from '@/../lib/utils/topics-validation';
+import { editTopicPost } from '@/app/lib/topics-server-actions';
+import { TopicPostValidationErrors, Topic } from '@/app/lib/utils/topics-validation';
 import Link from 'next/link'
 import { UserData } from '@/types/user-interfaces'
 import { useRouter } from 'next/navigation';

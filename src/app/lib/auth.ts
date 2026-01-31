@@ -2,12 +2,13 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
 import { username } from "better-auth/plugins"
-import { getDb } from "@/../lib/mongodb";
+import { getDb } from "@/app/lib/mongodb";
 
 const db = await getDb();
 export const auth = betterAuth({
 
     database: mongodbAdapter(db),
+    basePath: "/api/auth",
     emailAndPassword: {
         enabled: true
     },

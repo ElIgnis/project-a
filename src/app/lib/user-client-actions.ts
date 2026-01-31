@@ -1,7 +1,7 @@
 'use client'
 
-import { authClient } from '@/../lib/auth-client'
-import { SignUpFormSchema, LoginFormSchema, LoginValidationErrors, SignUpValidationErrors } from '../../../lib/utils/user-form-validation'
+import { authClient } from '@/app/lib/auth-client'
+import { SignUpFormSchema, LoginFormSchema, LoginValidationErrors, SignUpValidationErrors } from './utils/user-form-validation'
 import { z } from 'zod';
 
 type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }

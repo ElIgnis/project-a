@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { TopicPostSchema, TopicPostValidationErrors, TopicPostCommentSchema, TopicPostCommentValidationErrors } from './utils/topics-validation'
 import { GetServerSession }  from './utils/get-server-session';
-import { getDb } from "@/../lib/mongodb";
+import { getDb } from "./mongodb";
 import { Db, ObjectId } from 'mongodb'
 
 type PostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostValidationErrors; apiError: string | undefined }

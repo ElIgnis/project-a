@@ -4,14 +4,14 @@ import { useState, useRef, useEffect, useActionState } from 'react';
 import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, LuSend, LuArrowLeft } from 'react-icons/lu';
 import Link from 'next/link'
 import { UserData } from '@/types/user-interfaces'
-import { Topic, TopicComment, TopicPostCommentValidationErrors } from '@/../lib/utils/topics-validation';
+import { Topic, TopicComment, TopicPostCommentValidationErrors } from '@/app/lib/utils/topics-validation';
 import { 
     addCommentToTopicPost, 
     editTopicPostComment, 
     updateTopicPostCommentReactions, 
     updateTopicPostReactions, 
     deleteTopicPost, 
-    deleteTopicPostComment } from '@/../lib/topics-server-actions';
+    deleteTopicPostComment } from '@/app/lib/topics-server-actions';
 import { useClickOutsideSingle, useClickOutsideMap } from './utils/ui-utils';
 
 export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: UserData, postTopic: Topic, postTopicComments?: TopicComment[] }) {
