@@ -14,8 +14,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
         headers: await headers()
     })
 
-    //console.log(session);
-
     if (!session) {
         redirect('/login');
     }

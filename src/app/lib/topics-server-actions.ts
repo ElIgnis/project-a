@@ -124,7 +124,7 @@ export async function deleteTopicPost(topicId: string) : Promise<DeleteTopicPost
     }
 
     revalidatePath('/dashboard/topics-board');
-    redirect('/dashboard/topics-board');
+    return { success: true }
 }
 
 type PostTopicCommentResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostCommentValidationErrors; apiError: string | undefined }
@@ -241,9 +241,7 @@ export async function deleteTopicPostComment(postId: string, commentId: string) 
             apiError: "Write deletion failed"
         }
     }
-
     revalidatePath(`/dashboard/topics-board/${postId}`);
-    redirect(`/dashboard/topics-board/${postId}`);
 }
 
 export async function updateTopicPostReactions(targetId: string, reactionType: 'like' | 'dislike') {
