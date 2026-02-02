@@ -8,7 +8,9 @@ const uri = process.env.MONGODB_URI;
 const options = { appName: "atlas-purple-yacht" };
 
 let clientPromise: Promise<MongoClient>;
-let indexesCreated = false; // Use in-memory flag instead
+
+//TODO: change to manual 1 time setup
+let indexesCreated = false;
 
 if (process.env.NODE_ENV === "development") {
     const globalWithMongo = global as typeof globalThis & {
@@ -35,7 +37,7 @@ export async function getDb(): Promise<Db> {
     if (!indexesCreated) {
         await ensureIndexesCreated(db);
         indexesCreated = true;
-        
+
         if (process.env.NODE_ENV === "development") {
             const globalWithMongo = global as typeof globalThis & {
                 _indexesCreated?: boolean;
@@ -82,7 +84,7 @@ async function ensureIndexesCreated(db: Db) {
         for (const { key, options } of config.indexes) {
             try {
                 await collection.createIndex(key, options);
-                console.log(`Index created on ${config.collection}:`, key);
+                // console.log(`Index created on ${config.collection}:`, key);
             } catch (err: any) {
                 // Ignore "index already exists" errors
                 if (err.code !== 85 && err.code !== 86) {

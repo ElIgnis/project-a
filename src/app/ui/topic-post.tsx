@@ -13,6 +13,8 @@ import {
     deleteTopicPost, 
     deleteTopicPostComment } from '@/app/lib/topics-server-actions';
 import { useClickOutsideSingle, useClickOutsideMap } from './utils/ui-utils';
+import { useRouter } from 'next/navigation';
+import { SimpleModal } from './simple-modal';
 
 export default function TopicPost({ userData, postTopic, postTopicComments }: { userData: UserData, postTopic: Topic, postTopicComments?: TopicComment[] }) {
     const [showPostMenu, setShowPostMenu] = useState(false);
@@ -37,6 +39,39 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
     const bindedEditTopicComment = editTopicPostComment.bind(null, commentToUpdateId);
     const [editCommentResult, editCommentFormAction, isEditingPending] = useActionState(bindedEditTopicComment, null);
 
+    const [contextPostId, setContextPostId] = useState("");     // To be used for post deletion or comment reference
+    const [showPostConfirmDeletionModal, setShowPostConfirmDeletionModal] = useState(false);
+
+    const [commentIdToDelete, setCommentIdToDelete] = useState("");
+    const [showCommentConfirmDeletionModal, setShowCommentConfirmDeletionModal] = useState(false);
+
+    const router = useRouter();
+
+    const openPostDeletionModal = (id: string) => {
+        setContextPostId(id);
+        setShowPostConfirmDeletionModal(true);
+    }
+
+    const handlePostDeletion = async() => {
+        await deleteTopicPost(contextPostId);
+        setContextPostId("");
+        setShowPostConfirmDeletionModal(false);
+        router.push('/dashboard/topics-board');
+    }
+
+    const openCommentDeletionModal = (postId: string, commentId: string) => {
+        setContextPostId(postId);
+        setCommentIdToDelete(commentId);
+        setShowCommentConfirmDeletionModal(true);
+    }
+
+    const handleCommentDeletion = async() => {
+        await deleteTopicPostComment(contextPostId, commentIdToDelete);
+        setContextPostId("");
+        setCommentIdToDelete("");
+        setShowCommentConfirmDeletionModal(false);
+    }
+
     useEffect(()=> {
         if(createCommentResult && !createCommentResult.success) {
 
@@ -50,7 +85,6 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                 setCreateCommentsValidationError({
                     content: createCommentResult.validationErrors.content
                 });
-                console.log(createCommentResult.validationErrors);
             }
             setCreateCommentsFailedError(createCommentResult.message);
         }
@@ -179,7 +213,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                     </Link>
                                                     <button 
                                                     className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                                                    onClick={()=>deleteTopicPost(postTopic._id)}
+                                                    onClick={()=>openPostDeletionModal(postTopic._id)}
                                                     >
                                                         <LuTrash2 size={16} />
                                                         <span className="text-sm">Delete Post</span>
@@ -306,7 +340,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                             </button>
                                                             <button 
                                                             className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                                                            onClick={()=>deleteTopicPostComment(postTopic._id, comment._id)}
+                                                            onClick={()=>openCommentDeletionModal(postTopic._id, comment._id)}
                                                             >
                                                                 <LuTrash2 size={14} />
                                                                 <span className="text-sm  text-black">Delete Comment</span>
@@ -402,6 +436,28 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                     </div>
                 </div>
             </div>
+            {showPostConfirmDeletionModal && 
+                <SimpleModal 
+                    isOpen={showPostConfirmDeletionModal} 
+                    title="Confirm post deletion"
+                    description="Are you sure you want to delete this post?"
+                    confirmBtnText="Delete post"
+                    cancelBtnText="Cancel"
+                    onConfirm={()=>handlePostDeletion()}
+                    onClose={()=> setShowPostConfirmDeletionModal(false)}
+                    >
+                </SimpleModal>}
+            {showCommentConfirmDeletionModal && 
+                <SimpleModal 
+                    isOpen={showCommentConfirmDeletionModal} 
+                    title="Confirm comment deletion"
+                    description="Are you sure you want to delete this comment?"
+                    confirmBtnText="Delete comment"
+                    cancelBtnText="Cancel"
+                    onConfirm={()=>handleCommentDeletion()}
+                    onClose={()=> setShowCommentConfirmDeletionModal(false)}
+                    >
+                </SimpleModal>}
         </div>
     );
 }

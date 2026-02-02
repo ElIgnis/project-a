@@ -6,15 +6,29 @@ import { UserData } from '@/types/user-interfaces'
 import Link from 'next/link'
 import { Topic } from '@/app/lib/utils/topics-validation';
 import { deleteTopicPost } from '@/app/lib/topics-server-actions'
+import { SimpleModal } from './simple-modal';
 
 export default function TopicsBoard({userData, postTopics}: { userData: UserData, postTopics: Topic[] }) {
     
+    const [showConfirmDeletionModal, setShowConfirmDeletionModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState("");
     const [showModificationsMenuId, setShowModificationMenuId] = useState("");
     const currentUser = userData.id;
 
     const toggleModificationMenu = (id: string) => {
         setShowModificationMenuId(prevId => prevId === id ? "" : id);
     };
+
+    const openDeletionModal = (id: string) => {
+        setIdToDelete(id);
+        setShowConfirmDeletionModal(true);
+    }
+
+    const handlePostDeletion = async() => {
+        await deleteTopicPost(idToDelete);
+        setIdToDelete("");
+        setShowConfirmDeletionModal(false);
+    }
 
     return (
         <div className="max-w-4xl mx-auto p-4 space-y-4">
@@ -58,7 +72,7 @@ export default function TopicsBoard({userData, postTopics}: { userData: UserData
                                                 </Link>
                                                 <button 
                                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                                                onClick={()=> deleteTopicPost(postTopic._id)}
+                                                onClick={()=> openDeletionModal(postTopic._id)}
                                                 >
                                                     <LuTrash2 size={14} />
                                                     <span className="text-sm">Delete Post</span>
@@ -69,7 +83,7 @@ export default function TopicsBoard({userData, postTopics}: { userData: UserData
                                 )}
                             </div>
 
-                            <p className="text-gray-800 mb-2">{postTopic.content}</p>
+                            <p className="text-gray-800 mb-2 font-bold text-lg">{postTopic.title}</p>
 
                             <div className="flex items-center space-x-4">
                                 <button className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors text-sm">
@@ -103,6 +117,18 @@ export default function TopicsBoard({userData, postTopics}: { userData: UserData
                     Create Topic <LuPencilLine  className="mt-0.5 ml-auto h-5 w-5 text-gray-50" /> 
                 </Link>
             </div>
+
+            {showConfirmDeletionModal && 
+            <SimpleModal 
+                isOpen={showConfirmDeletionModal} 
+                title="Confirm post deletion"
+                description="Are you sure you want to delete this post?"
+                confirmBtnText="Delete"
+                cancelBtnText="Cancel"
+                onConfirm={()=>handlePostDeletion()}
+                onClose={()=> setShowConfirmDeletionModal(false)}
+                >
+            </SimpleModal>}
         </div>
     );
 }
