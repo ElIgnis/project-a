@@ -178,9 +178,41 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                         <div className="bg-white rounded-lg shadow-md overflow-hidden">
                             {/* Post Header */}
                             <div className="p-6 border-b border-gray-200">
-                                <div className="flex justify-between items-start">
+                                <div className="flex justify-between items-start text-gray-900">
                                     <div>
-                                        <h1 className="text-3xl font-bold text-gray-900 mb-3">{postTopic.title}</h1>
+                                        <div className="flex items-start justify-between gap-4 mb-3">
+                                            <h1 className="text-3xl font-bold break-all min-w-0 flex-1">{postTopic.title}</h1>
+                                            {/* Post Menu (Only for owner) */}
+                                            {postTopic.userId === userData.id && (
+                                                <div ref={menuRef} className="relative">
+                                                    <button
+                                                        onClick={() => setShowPostMenu(!showPostMenu)}
+                                                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                                    >
+                                                        <LuEllipsisVertical size={20} className="text-gray-600" />
+                                                    </button>
+
+                                                    {showPostMenu && (
+                                                        <div  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                                            <Link
+                                                                className="w-full text-left px-4 py-2 hover:bg-blue-100 flex items-center space-x-2"
+                                                                href={`/dashboard/topics-board/edit-topic/${postTopic._id}`}
+                                                            >
+                                                                <LuSquarePen className="stroke-black" size={14} />
+                                                                <span className="text-sm text-black">Edit Post</span>
+                                                            </Link>
+                                                            <button 
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                                                            onClick={()=>openPostDeletionModal(postTopic._id)}
+                                                            >
+                                                                <LuTrash2 size={16} />
+                                                                <span className="text-sm">Delete Post</span>
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                         <div className="flex items-center text-sm text-gray-600">
                                             <span className="font-medium text-lg">{postTopic.username}</span>
                                             <span className="mx-2">•</span>
@@ -191,37 +223,6 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                             })}</span>
                                         </div>
                                     </div>
-
-                                    {/* Post Menu (Only for owner) */}
-                                    {postTopic.userId === userData.id && (
-                                        <div ref={menuRef} className="relative">
-                                            <button
-                                                onClick={() => setShowPostMenu(!showPostMenu)}
-                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                                            >
-                                                <LuEllipsisVertical size={20} className="text-gray-600" />
-                                            </button>
-
-                                            {showPostMenu && (
-                                                <div  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                                                    <Link
-                                                        className="w-full text-left px-4 py-2 hover:bg-blue-100 flex items-center space-x-2"
-                                                        href={`/dashboard/topics-board/edit-topic/${postTopic._id}`}
-                                                    >
-                                                        <LuSquarePen className="stroke-black" size={14} />
-                                                        <span className="text-sm text-black">Edit Post</span>
-                                                    </Link>
-                                                    <button 
-                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                                                    onClick={()=>openPostDeletionModal(postTopic._id)}
-                                                    >
-                                                        <LuTrash2 size={16} />
-                                                        <span className="text-sm">Delete Post</span>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 

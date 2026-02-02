@@ -50,8 +50,11 @@ export default function TopicsBoard({userData, postTopics}: { userData: UserData
                                                 day: 'numeric'
                                             })}</span>
                                 </div>
+                            </div>
 
-                                {/* Topic Edit Menu (Only for owner) */}
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                            <p className="text-gray-800 mb-2 font-bold break-all text-lg">{postTopic.title}</p>
+                            {/* Topic Edit Menu (Only for owner) */}
                                 {postTopic.userId === currentUser && (
                                     <div className="relative">
                                         <button
@@ -82,8 +85,6 @@ export default function TopicsBoard({userData, postTopics}: { userData: UserData
                                     </div>
                                 )}
                             </div>
-
-                            <p className="text-gray-800 mb-2 font-bold text-lg">{postTopic.title}</p>
 
                             <div className="flex items-center space-x-4">
                                 <button className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors text-sm">
