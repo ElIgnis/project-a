@@ -242,6 +242,7 @@ export async function deleteTopicPostComment(postId: string, commentId: string) 
         }
     }
     revalidatePath(`/dashboard/topics-board/${postId}`);
+    return { success: true }
 }
 
 export async function updateTopicPostReactions(targetId: string, reactionType: 'like' | 'dislike') {

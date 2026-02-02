@@ -5,13 +5,14 @@ import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, Lu
 import Link from 'next/link'
 import { UserData } from '@/types/user-interfaces'
 import { Topic, TopicComment, TopicPostCommentValidationErrors } from '@/app/lib/utils/topics-validation';
-import { 
-    addCommentToTopicPost, 
-    editTopicPostComment, 
-    updateTopicPostCommentReactions, 
-    updateTopicPostReactions, 
-    deleteTopicPost, 
-    deleteTopicPostComment } from '@/app/lib/topics-server-actions';
+import {
+    addCommentToTopicPost,
+    editTopicPostComment,
+    updateTopicPostCommentReactions,
+    updateTopicPostReactions,
+    deleteTopicPost,
+    deleteTopicPostComment
+} from '@/app/lib/topics-server-actions';
 import { useClickOutsideSingle, useClickOutsideMap } from './utils/ui-utils';
 import { useRouter } from 'next/navigation';
 import { SimpleModal } from './simple-modal';
@@ -32,10 +33,10 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
     const [editCommentsFailedError, setEditCommentsFailedError] = useState<string | undefined>("");
 
     const commentTopicPostBindId = addCommentToTopicPost.bind(null, postTopic._id);
-    
+
     const [isEditingComment, setIsEditingComment] = useState(false);
     const [createCommentResult, createCommentFormAction, isCreationPending] = useActionState(commentTopicPostBindId, null);
-    
+
     const bindedEditTopicComment = editTopicPostComment.bind(null, commentToUpdateId);
     const [editCommentResult, editCommentFormAction, isEditingPending] = useActionState(bindedEditTopicComment, null);
 
@@ -52,7 +53,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
         setShowPostConfirmDeletionModal(true);
     }
 
-    const handlePostDeletion = async() => {
+    const handlePostDeletion = async () => {
         await deleteTopicPost(contextPostId);
         setContextPostId("");
         setShowPostConfirmDeletionModal(false);
@@ -65,23 +66,23 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
         setShowCommentConfirmDeletionModal(true);
     }
 
-    const handleCommentDeletion = async() => {
+    const handleCommentDeletion = async () => {
         await deleteTopicPostComment(contextPostId, commentIdToDelete);
         setContextPostId("");
         setCommentIdToDelete("");
         setShowCommentConfirmDeletionModal(false);
     }
 
-    useEffect(()=> {
-        if(createCommentResult && !createCommentResult.success) {
+    useEffect(() => {
+        if (createCommentResult && !createCommentResult.success) {
 
             // Server sided errors
-            if(createCommentResult.apiError) {
+            if (createCommentResult.apiError) {
                 setCreateCommentsFailedError(createCommentResult.apiError);
             }
 
             // Client sided errors
-            else if(createCommentResult.validationErrors) {
+            else if (createCommentResult.validationErrors) {
                 setCreateCommentsValidationError({
                     content: createCommentResult.validationErrors.content
                 });
@@ -91,16 +92,16 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
         setNewComment("");
     }, [createCommentResult]);
 
-    useEffect(()=> {
-        if(editCommentResult && !editCommentResult.success) {
+    useEffect(() => {
+        if (editCommentResult && !editCommentResult.success) {
 
             // Server sided errors
-            if(editCommentResult.apiError) {
+            if (editCommentResult.apiError) {
                 setEditCommentsFailedError(editCommentResult.apiError);
             }
 
             // Client sided errors
-            else if(editCommentResult.validationErrors) {
+            else if (editCommentResult.validationErrors) {
                 setEditCommentsValidationError(editCommentResult.validationErrors);
             }
             setEditCommentsFailedError(editCommentResult.message);
@@ -111,19 +112,19 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
     }, [editCommentResult]);
 
     const menuRef = useRef<HTMLDivElement>(null);   // The dropdown menu for post
-    useClickOutsideSingle(menuRef, () => {setShowPostMenu(false);});
+    useClickOutsideSingle(menuRef, () => { setShowPostMenu(false); });
 
     const commentsMenuButtonRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
     function getCommentsMenuButtonRefMap() {
-        if(!commentsMenuButtonRefs.current) {
-            commentsMenuButtonRefs.current = new Map<string, HTMLDivElement | null> ();
+        if (!commentsMenuButtonRefs.current) {
+            commentsMenuButtonRefs.current = new Map<string, HTMLDivElement | null>();
         }
         return commentsMenuButtonRefs.current;
     }
-    useClickOutsideMap(commentsMenuButtonRefs, commentMenuId, ()=> {
+    useClickOutsideMap(commentsMenuButtonRefs, commentMenuId, () => {
         setShowCommentMenu(false);
 
-        if(!isEditingComment) {
+        if (!isEditingComment) {
             setCommentMenuId("");
         }
     })
@@ -179,49 +180,49 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                             {/* Post Header */}
                             <div className="p-6 border-b border-gray-200">
                                 <div className="flex justify-between items-start text-gray-900">
-                                    <div>
-                                        <div className="flex items-start justify-between gap-4 mb-3">
-                                            <h1 className="text-3xl font-bold break-all min-w-0 flex-1">{postTopic.title}</h1>
-                                            {/* Post Menu (Only for owner) */}
-                                            {postTopic.userId === userData.id && (
-                                                <div ref={menuRef} className="relative">
-                                                    <button
-                                                        onClick={() => setShowPostMenu(!showPostMenu)}
-                                                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                                                    >
-                                                        <LuEllipsisVertical size={20} className="text-gray-600" />
-                                                    </button>
+                                    
+                                    <div className="flex items-start justify-between gap-4 mb-3">
+                                        <h1 className="text-3xl font-bold break-all min-w-0 flex-1">{postTopic.title}</h1>
+                                        {/* Post Menu (Only for owner) */}
+                                        {postTopic.userId === userData.id && (
+                                            <div ref={menuRef} className="relative">
+                                                <button
+                                                    onClick={() => setShowPostMenu(!showPostMenu)}
+                                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                                >
+                                                    <LuEllipsisVertical size={20} className="text-gray-600" />
+                                                </button>
 
-                                                    {showPostMenu && (
-                                                        <div  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-                                                            <Link
-                                                                className="w-full text-left px-4 py-2 hover:bg-blue-100 flex items-center space-x-2"
-                                                                href={`/dashboard/topics-board/edit-topic/${postTopic._id}`}
-                                                            >
-                                                                <LuSquarePen className="stroke-black" size={14} />
-                                                                <span className="text-sm text-black">Edit Post</span>
-                                                            </Link>
-                                                            <button 
+                                                {showPostMenu && (
+                                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                                                        <Link
+                                                            className="w-full text-left px-4 py-2 hover:bg-blue-100 flex items-center space-x-2"
+                                                            href={`/dashboard/topics-board/edit-topic/${postTopic._id}`}
+                                                        >
+                                                            <LuSquarePen className="stroke-black" size={14} />
+                                                            <span className="text-sm text-black">Edit Post</span>
+                                                        </Link>
+                                                        <button
                                                             className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                                                            onClick={()=>openPostDeletionModal(postTopic._id)}
-                                                            >
-                                                                <LuTrash2 size={16} />
-                                                                <span className="text-sm">Delete Post</span>
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center text-sm text-gray-600">
-                                            <span className="font-medium text-lg">{postTopic.username}</span>
-                                            <span className="mx-2">•</span>
-                                            <span>{new Date(postTopic.createdAt).toLocaleString('en-US', {
-                                                year: 'numeric',
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}</span>
-                                        </div>
+                                                            onClick={() => openPostDeletionModal(postTopic._id)}
+                                                        >
+                                                            <LuTrash2 size={16} />
+                                                            <span className="text-sm">Delete Post</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="flex items-center text-sm text-gray-600">
+                                        <span className="font-medium text-lg">{postTopic.username}</span>
+                                        <span className="mx-2">•</span>
+                                        <span>{new Date(postTopic.createdAt).toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })}</span>
                                     </div>
                                 </div>
                             </div>
@@ -279,7 +280,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                     />
                                 </div>
                                 <div id="create-comment-error" aria-live="polite" aria-atomic="true">
-                                    {createCommentsValidationError?.content && createCommentsValidationError.content.map((error: string)=> (
+                                    {createCommentsValidationError?.content && createCommentsValidationError.content.map((error: string) => (
                                         <p className="mt-2 text-sm text-red-500" key={error}>
                                             {error}
                                         </p>
@@ -317,12 +318,12 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
 
                                             {/* Comment Menu (Only for owner) */}
                                             {comment.userId === userData.id && (
-                                                <div ref={(node)=>{
+                                                <div ref={(node) => {
                                                     const map = getCommentsMenuButtonRefMap();
                                                     map.set(comment._id, node);
 
-                                                    return () => {map.delete(comment._id);};
-                                                    }} className="relative">
+                                                    return () => { map.delete(comment._id); };
+                                                }} className="relative">
                                                     {!isEditingComment && <button
                                                         onClick={() => toggleCommentMenu(comment._id)}
                                                         className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -330,18 +331,18 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                         <LuEllipsisVertical size={16} className="text-gray-600" />
                                                     </button>}
 
-                                                    {commentMenuId === comment._id && showCommentMenu && !isEditingComment&& (
+                                                    {commentMenuId === comment._id && showCommentMenu && !isEditingComment && (
                                                         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                                                             <button
-                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
-                                                            onClick={()=> handleEditingComment()}
+                                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2"
+                                                                onClick={() => handleEditingComment()}
                                                             >
                                                                 <LuSquarePen className="stroke-black" size={14} />
                                                                 <span className="text-sm  text-black">Edit Comment</span>
                                                             </button>
-                                                            <button 
-                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
-                                                            onClick={()=>openCommentDeletionModal(postTopic._id, comment._id)}
+                                                            <button
+                                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2 text-red-600"
+                                                                onClick={() => openCommentDeletionModal(postTopic._id, comment._id)}
                                                             >
                                                                 <LuTrash2 size={14} />
                                                                 <span className="text-sm  text-black">Delete Comment</span>
@@ -352,7 +353,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                             )}
                                         </div>
 
-                                        {commentMenuId === comment._id && isEditingComment ? 
+                                        {commentMenuId === comment._id && isEditingComment ?
                                             <div className="flex space-x-4">
                                                 <form action={editCommentFormAction} className="w-full flex flex-col" >
                                                     <textarea
@@ -367,17 +368,17 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                     />
                                                     <div className="flex flex-row justify-between">
                                                         <div id="edit-comment-error" aria-live="polite" aria-atomic="true">
-                                                            {editCommentsValidationError?.content && editCommentsValidationError.content.map((error: string)=> (
+                                                            {editCommentsValidationError?.content && editCommentsValidationError.content.map((error: string) => (
                                                                 <p className="mt-2 text-sm text-red-500" key={error}>
                                                                     {error}
                                                                 </p>
                                                             ))}
                                                         </div>
                                                         <div className="flex justify-end gap-x-8">
-                                                            <button type="button" onClick={()=> handleCancelEditing()}className="self-end flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 transition-colors">
+                                                            <button type="button" onClick={() => handleCancelEditing()} className="self-end flex items-center space-x-2 px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-700 transition-colors">
                                                                 Cancel
                                                             </button>
-                                                            
+
                                                             <button type="submit" className="self-end flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-slate-700 transition-colors">
                                                                 <LuSquarePen className="stroke-white" size={14} />
                                                                 <span className="text-md text-white">Edit Comment</span>
@@ -388,7 +389,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                             </div> :
                                             <p className="text-gray-800 mb-3 leading-relaxed">{comment.content}</p>
                                         }
-                                        
+
                                         <div className="flex items-center space-x-4">
                                             <button
                                                 onClick={() => handleCommentReaction(comment._id, 'like')}
@@ -437,27 +438,27 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                     </div>
                 </div>
             </div>
-            {showPostConfirmDeletionModal && 
-                <SimpleModal 
-                    isOpen={showPostConfirmDeletionModal} 
+            {showPostConfirmDeletionModal &&
+                <SimpleModal
+                    isOpen={showPostConfirmDeletionModal}
                     title="Confirm post deletion"
                     description="Are you sure you want to delete this post?"
                     confirmBtnText="Delete post"
                     cancelBtnText="Cancel"
-                    onConfirm={()=>handlePostDeletion()}
-                    onClose={()=> setShowPostConfirmDeletionModal(false)}
-                    >
+                    onConfirm={() => handlePostDeletion()}
+                    onClose={() => setShowPostConfirmDeletionModal(false)}
+                >
                 </SimpleModal>}
-            {showCommentConfirmDeletionModal && 
-                <SimpleModal 
-                    isOpen={showCommentConfirmDeletionModal} 
+            {showCommentConfirmDeletionModal &&
+                <SimpleModal
+                    isOpen={showCommentConfirmDeletionModal}
                     title="Confirm comment deletion"
                     description="Are you sure you want to delete this comment?"
                     confirmBtnText="Delete comment"
                     cancelBtnText="Cancel"
-                    onConfirm={()=>handleCommentDeletion()}
-                    onClose={()=> setShowCommentConfirmDeletionModal(false)}
-                    >
+                    onConfirm={() => handleCommentDeletion()}
+                    onClose={() => setShowCommentConfirmDeletionModal(false)}
+                >
                 </SimpleModal>}
         </div>
     );
