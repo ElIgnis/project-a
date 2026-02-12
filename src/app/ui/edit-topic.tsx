@@ -1,23 +1,28 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useActionState } from 'react';
-import { LuUpload, LuX } from 'react-icons/lu';
-import { editTopicPost } from '@/app/lib/topics-server-actions';
-import { TopicPostErrors, Topic } from '@/app/lib/utils/topics-validation';
-import Link from 'next/link'
-import { UserData } from '@/types/user-interfaces'
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useActionState } from "react";
+import { LuUpload, LuX } from "react-icons/lu";
+import { editTopicPost } from "@/app/lib/topics-server-actions";
+import { TopicPostErrors, Topic } from "@/app/lib/utils/topics-validation";
+import Link from "next/link";
+import { UserData } from "@/types/user-interfaces";
+import { useRouter } from "next/navigation";
 
-export default function CreateTopic({ userData, postTopic }: { userData: UserData, postTopic: Topic }) {
+export default function CreateTopic({
+    userData,
+    postTopic,
+}: {
+    userData: UserData;
+    postTopic: Topic;
+}) {
+    const [editPostErrors, setEditPostErrors] =
+        useState<TopicPostErrors | null>(null);
 
-    const [validationErrors, setValidationErrors] = useState<TopicPostErrors | null>(null);
-    const [postFailedError, setPostFailedError] = useState<string | undefined>("");
     const [title, setTitle] = useState(postTopic.title);
     const [content, setContent] = useState(postTopic.content);
     // const [mediaPreview, setMediaPreview] = useState(null);
     // const [mediaFile, setMediaFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
 
     // const handleImageUpload = (e) => {
     //   const file = e.target.files[0];
@@ -36,48 +41,53 @@ export default function CreateTopic({ userData, postTopic }: { userData: UserDat
     //   setMediaFile(null);
     // };
     const editTopicPostBindId = editTopicPost.bind(null, postTopic._id);
-    const [result, editTopicFormAction, isPending] = useActionState(editTopicPostBindId, null);
+    const [result, editTopicFormAction, isPending] = useActionState(
+        editTopicPostBindId,
+        null,
+    );
 
     const router = useRouter();
 
     useEffect(() => {
-
-        if (result && !result.success) {
-
-            // Server sided errors
-            if (result.apiError) {
-                setPostFailedError(result.apiError);
-            }
-
-            // Client sided errors
-            else if (result.validationErrors) {
-                setValidationErrors({
-                    title: result.validationErrors.title,
-                    content: result.validationErrors.content
+        if (result) {
+            if (!result.success) {
+                // Client sided errors
+                if (result.validationErrors) {
+                    setEditPostErrors({
+                        title: result.validationErrors.title,
+                        content: result.validationErrors.content,
+                    });
+                }
+            } else {
+                setEditPostErrors({
+                    title: undefined,
+                    content: undefined,
                 });
-                setPostFailedError(result.message);
             }
         }
-    }, [result])
+    }, [result]);
 
     const handleCancel = () => {
         router.back();
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="mx-auto max-w-4xl p-4">
+            <div className="overflow-hidden rounded-lg bg-white shadow-md">
                 {/* Header */}
-                <div className="bg-slate-800 text-white p-4">
+                <div className="bg-slate-800 p-4 text-white">
                     <h1 className="text-2xl font-bold">Edit Post</h1>
                 </div>
 
                 {/* Content */}
                 <form action={editTopicFormAction} className="space-y-3">
-                    <div className="p-6 space-y-6">
+                    <div className="space-y-6 p-6">
                         {/* Post Title */}
                         <div>
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="title"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
                                 Post Title *
                             </label>
                             <input
@@ -87,13 +97,26 @@ export default function CreateTopic({ userData, postTopic }: { userData: UserDat
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Enter a catchy title for your post"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all text-gray-700"
+                                className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-slate-500"
+                                aria-describedby="edit-post-title-error"
                             />
                         </div>
+                        {editPostErrors?.title &&
+                            editPostErrors.title.map((error: string) => (
+                                <p
+                                    className="mt-2 text-sm text-red-500"
+                                    key={error}
+                                >
+                                    {error}
+                                </p>
+                            ))}
 
                         {/* Post Content */}
                         <div>
-                            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                            <label
+                                htmlFor="content"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                            >
                                 Content *
                             </label>
                             <textarea
@@ -103,14 +126,25 @@ export default function CreateTopic({ userData, postTopic }: { userData: UserDat
                                 onChange={(e) => setContent(e.target.value)}
                                 placeholder="What's on your mind?"
                                 rows={6}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none resize-none transition-all text-gray-700"
+                                className="w-full resize-none rounded-md border border-gray-300 px-4 py-2 text-gray-700 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-slate-500"
                             />
-                            <p className="text-sm text-gray-500 mt-1">{content.length} characters</p>
+                            <p className="mt-1 text-sm text-gray-500">
+                                {content.length} characters
+                            </p>
                         </div>
+                        {editPostErrors?.content &&
+                            editPostErrors.content.map((error: string) => (
+                                <p
+                                    className="mt-2 text-sm text-red-500"
+                                    key={error}
+                                >
+                                    {error}
+                                </p>
+                            ))}
 
                         {/* Media Upload */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="mb-2 block text-sm font-medium text-gray-700">
                                 Media (Optional)
                             </label>
 
@@ -161,10 +195,10 @@ export default function CreateTopic({ userData, postTopic }: { userData: UserDat
             </div> */}
 
                         {/* Action Buttons */}
-                        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                        <div className="flex justify-end space-x-3 border-t border-gray-200 pt-4">
                             <button
                                 onClick={handleCancel}
-                                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
+                                className="rounded-md border border-gray-300 px-6 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
                             >
                                 Cancel Edit
                             </button>
@@ -172,9 +206,9 @@ export default function CreateTopic({ userData, postTopic }: { userData: UserDat
                                 type="submit"
                                 //onClick={handleSubmit}
                                 // disabled={!isFormValid || isSubmitting}
-                                className="px-6 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+                                className="rounded-md bg-slate-800 px-6 py-2 font-medium text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-gray-300"
                             >
-                                {isSubmitting ? 'Editing...' : 'Edit Post'}
+                                {isSubmitting ? "Editing..." : "Edit Post"}
                             </button>
                         </div>
                     </div>
