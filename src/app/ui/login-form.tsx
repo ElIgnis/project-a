@@ -5,37 +5,42 @@ import { FcGoogle } from "react-icons/fc";
 import { Button } from '@/app/ui/button';
 import { emailLogin, googleLogin } from '@/app/lib/user-client-actions'
 import { useState } from 'react';
-import { LoginValidationErrors } from '@/app/lib/utils/user-form-validation'
+import { LoginErrors } from '@/app/lib/utils/user-form-validation'
 import Link from 'next/link'
 
 export default function LoginForm() {
 
-  const [validationErrors, setValidationErrors] = useState<LoginValidationErrors | null>(null);
+  const [loginErrors, setLoginErrors] = useState<LoginErrors | null>(null);
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [loginFailedError, setLoginFailedError] = useState<string | undefined>("");
 
   const handleLogin = async(e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = await emailLogin(email, password);
 
-    if (result && !result.success) {
-      // Server sided errors
-      if (result.apiError) {
-        setLoginFailedError(result.apiError);
-      }
+    if (result) {
+      
+      if(!result.success) {
 
-      // Client sided errors
-      else if (result.validationErrors) {
-        setValidationErrors({
-          email: result.validationErrors.email,
-          password: result.validationErrors.password,
-        });
-        setLoginFailedError(result.message);
-        if (result.validationErrors.password)
-          setPassword("");
+        if (result.validationErrors && result.message) {
+          let parsedMsg: string[] = [result.message];
+          
+          setLoginErrors({
+            email: result.validationErrors.email,
+            password: result.validationErrors.password,
+            content: parsedMsg
+          });
+          
+          if (result.validationErrors.password)
+            setPassword("");
+        }
+      }
+      else {
+        setLoginErrors({
+          email: undefined,
+          password: undefined
+        })
       }
     }
   }
@@ -55,11 +60,11 @@ export default function LoginForm() {
                 Log into your account
               </h1>
               <div id="form-submit-error" aria-live="polite" aria-atomic="true">
-                {(validationErrors || loginFailedError) &&
-                  <p className="mt-2 text-sm text-red-500">
-                    {loginFailedError}
-                  </p>
-                }
+                {loginErrors?.content && loginErrors.content.map((error: string) => (
+                        <p className="mt-2 text-sm text-red-500" key={error}>
+                          {error}
+                        </p>
+                      ))}
               </div>
 
               {/* Normal login */}
@@ -86,8 +91,8 @@ export default function LoginForm() {
                     <LuAtSign className="pointer-events-none absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                   </div>
                   <div id="email-error" aria-live="polite" aria-atomic="true">
-                    {validationErrors?.email &&
-                      validationErrors.email.map((error: string) => (
+                    {loginErrors?.email &&
+                      loginErrors.email.map((error: string) => (
                         <p className="mt-2 text-sm text-red-500" key={error}>
                           {error}
                         </p>
@@ -118,8 +123,8 @@ export default function LoginForm() {
                     <LuKey className="pointer-events-none absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
                   </div>
                   <div id="password-error" aria-live="polite" aria-atomic="true">
-                    {validationErrors?.password &&
-                      validationErrors.password.map((error: string) => (
+                    {loginErrors?.password &&
+                      loginErrors.password.map((error: string) => (
                         <p className="mt-2 text-sm text-red-500" key={error}>
                           {error}
                         </p>

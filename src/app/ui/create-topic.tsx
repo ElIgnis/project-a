@@ -2,121 +2,142 @@
 
 import { useState, useEffect, useActionState } from 'react';
 import { createTopicPost } from '@/app/lib/topics-server-actions';
-import { TopicPostValidationErrors } from '@/app/lib/utils/topics-validation';
+import { TopicPostErrors } from '@/app/lib/utils/topics-validation';
 import Link from 'next/link'
-import { UserData } from '@/types/user-interfaces'
 
-export default function CreateTopic({userData} : { userData: UserData }) {
+export default function CreateTopic() {
 
-  const [validationErrors, setValidationErrors] = useState<TopicPostValidationErrors | null>(null);
-  const [postFailedError, setPostFailedError] = useState<string | undefined>("");
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  // const [mediaPreview, setMediaPreview] = useState(null);
-  // const [mediaFile, setMediaFile] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+	const [createPostError, setCreatePostError] = useState<TopicPostErrors | null>(null);
+
+	const [title, setTitle] = useState('');
+	const [content, setContent] = useState('');
+	// const [mediaPreview, setMediaPreview] = useState(null);
+	// const [mediaFile, setMediaFile] = useState(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-  // const handleImageUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file && file.type.startsWith('image/')) {
-  //     setMediaFile(file);
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setMediaPreview(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
+	// const handleImageUpload = (e) => {
+	//   const file = e.target.files[0];
+	//   if (file && file.type.startsWith('image/')) {
+	//     setMediaFile(file);
+	//     const reader = new FileReader();
+	//     reader.onloadend = () => {
+	//       setMediaPreview(reader.result);
+	//     };
+	//     reader.readAsDataURL(file);
+	//   }
+	// };
 
-  // const removeMedia = () => {
-  //   setMediaPreview(null);
-  //   setMediaFile(null);
-  // };
+	// const removeMedia = () => {
+	//   setMediaPreview(null);
+	//   setMediaFile(null);
+	// };
 
-  const [result, createTopicFormAction, isPending] = useActionState(createTopicPost, null);
+	const [createTopicPostResult, createTopicPostFormAction, isPending] = useActionState(createTopicPost, null);
 
-  useEffect(() => {
+	useEffect(() => {
+		if (createTopicPostResult) {
+			if (!createTopicPostResult.success) {
+				// Validation errors
+				if (createTopicPostResult.validationErrors) {
+					setCreatePostError({
+						title: createTopicPostResult.validationErrors.title,
+						content: createTopicPostResult.validationErrors.content
+					})
+				}
+				// BE errors
+				else if (createTopicPostResult.message) {
+					let parsedMsg: string[] = [createTopicPostResult.message];
 
-    if (result && !result.success) {
+					setCreatePostError(
+						{
+							content: parsedMsg
+						});
+				}
+			}
+			else {
+				setCreatePostError(null);
+			}
+		}
+	}, [createTopicPostResult])
 
-      // Server sided errors
-      if(result.apiError) {
-        setPostFailedError(result.apiError);
-      }
+	const handleCancel = () => {
+		//setTitle('');
+		//setContent('');
+		// setMediaPreview(null);
+		// setMediaFile(null);
+	};
 
-      // Client sided errors
-      else if(result.validationErrors) {
-        setValidationErrors({
-          title: result.validationErrors.title,
-          content: result.validationErrors.content
-        });
-        setPostFailedError(result.message);
-      }
-    }
-   }, [result])
+	const isFormValid = title.trim() && content.trim();
 
-  const handleCancel = () => {
-    //setTitle('');
-    //setContent('');
-    // setMediaPreview(null);
-    // setMediaFile(null);
-  };
+	return (
+		<div className="max-w-4xl mx-auto p-4">
+			<div className="bg-white rounded-lg shadow-md overflow-hidden">
+				{/* Header */}
+				<div className="bg-slate-800 text-white p-4">
+					<h1 className="text-2xl font-bold">Create New Post</h1>
+					<p className="text-slate-300 text-sm mt-1">Share your thoughts with the community</p>
+				</div>
 
-  const isFormValid = title.trim() && content.trim();
+				{/* Content */}
+				<form action={createTopicPostFormAction} className="space-y-3">
+					<div className="p-6 space-y-6">
+						{/* Post Title */}
+						<div>
+							<label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+								Post Title *
+							</label>
+							<input
+								id="title"
+								name="title"
+								type="text"
+								value={title}
+								onChange={(e) => setTitle(e.target.value)}
+								placeholder="Enter a catchy title for your post"
+								className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all text-gray-700"
+								aria-describedby="create-post-title-error"
+							/>
+						</div>
+						<div id="create-post-title-error" aria-live="polite" aria-atomic="true">
+							{createPostError?.title && createPostError.title.map((error: string) => (
+								<p className="mt-2 text-sm text-red-500" key={error}>
+									{error}
+								</p>
+							))}
+						</div>
 
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        {/* Header */}
-        <div className="bg-slate-800 text-white p-4">
-          <h1 className="text-2xl font-bold">Create New Post</h1>
-          <p className="text-slate-300 text-sm mt-1">Share your thoughts with the community</p>
-        </div>
+						{/* Post Content */}
+						<div>
+							<label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+								Content *
+							</label>
+							<textarea
+								id="content"
+								name="content"
+								value={content}
+								onChange={(e) => setContent(e.target.value)}
+								placeholder="What's on your mind?"
+								rows={6}
+								className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none resize-none transition-all text-gray-700"
+								aria-describedby="create-post-content-error"
+							/>
+							<p className="text-sm text-gray-500 mt-1">{content.length} characters</p>
+						</div>
+						<div id="create-post-content-error" aria-live="polite" aria-atomic="true">
+							{createPostError?.content && createPostError.content.map((error: string) => (
+								<p className="mt-2 text-sm text-red-500" key={error}>
+									{error}
+								</p>
+							))}
+						</div>
 
-        {/* Content */}
-        <form action={createTopicFormAction} className="space-y-3">
-          <div className="p-6 space-y-6">
-            {/* Post Title */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Post Title *
-              </label>
-              <input
-                id="title"
-                name="title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter a catchy title for your post"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none transition-all text-gray-700"
-              />
-            </div>
+						{/* Media Upload */}
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Media (Optional)
+							</label>
 
-            {/* Post Content */}
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                Content *
-              </label>
-              <textarea
-                id="content"
-                name="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="What's on your mind?"
-                rows={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-slate-500 focus:border-transparent outline-none resize-none transition-all text-gray-700"
-              />
-              <p className="text-sm text-gray-500 mt-1">{content.length} characters</p>
-            </div>
-
-            {/* Media Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Media (Optional)
-              </label>
-
-              {/* {!mediaPreview ? (
+							{/* {!mediaPreview ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center hover:border-slate-400 transition-colors">
                   <input
                     type="file"
@@ -149,10 +170,10 @@ export default function CreateTopic({userData} : { userData: UserData }) {
                   </button>
                 </div>
               )} */}
-            </div>
+						</div>
 
-            {/* Post Preview Info TODO: Implement as separate component later*/}
-            {/* <div className="bg-gray-50 rounded-md p-4 border border-gray-200">
+						{/* Post Preview Info TODO: Implement as separate component later*/}
+						{/* <div className="bg-gray-50 rounded-md p-4 border border-gray-200">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Post Preview Info</h3>
               <div className="flex items-center text-sm text-gray-600">
                 <span className="font-medium">{userData.name}</span>
@@ -162,27 +183,27 @@ export default function CreateTopic({userData} : { userData: UserData }) {
               </div>
             </div> */}
 
-            {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-              <Link
-                href="/dashboard/topics-board"
-                onClick={handleCancel}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                //onClick={handleSubmit}
-                // disabled={!isFormValid || isSubmitting}
-                className="px-6 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                {isSubmitting ? 'Publishing...' : 'Publish Post'}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+						{/* Action Buttons */}
+						<div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+							<Link
+								href="/dashboard/topics-board"
+								onClick={handleCancel}
+								className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium"
+							>
+								Cancel
+							</Link>
+							<button
+								type="submit"
+								//onClick={handleSubmit}
+								// disabled={!isFormValid || isSubmitting}
+								className="px-6 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+							>
+								{isSubmitting ? 'Publishing...' : 'Publish Post'}
+							</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	);
 }

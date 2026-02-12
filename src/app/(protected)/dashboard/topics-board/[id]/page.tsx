@@ -8,8 +8,6 @@ import { UserData } from '@/types/user-interfaces'
 export default async function PostPage({ params }: { params: { id: string } }) {
 
     const session = await GetServerSession();
-    if (!session)
-        return;
 
     const { id } = await params;
     const topicPost = await retrieveTopicPostById(id);

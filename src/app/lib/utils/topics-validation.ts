@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-export interface TopicPostValidationErrors {
+export interface TopicPostErrors {
     title?: string[] | undefined,
     content?: string[] | undefined,
 }
 
 export const TopicPostSchema = z.object({
-    title: z.string().min(10, "Minimum of 10 characters"),
-    content: z.string().min(10, "Minimum of 10 characters"),
+    title: z.string().min(10, "Title requires a minimum of 10 characters"),
+    content: z.string().min(10, "Content requires a minimum of 10 characters"),
 });
 
 export interface Topic {
@@ -22,7 +22,7 @@ export interface Topic {
     dislikes: number;
 }
 
-export interface TopicPostCommentValidationErrors {
+export interface TopicPostCommentErrors {
     content?: string[] | undefined,
 }
 

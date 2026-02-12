@@ -9,8 +9,6 @@ import { UserData } from '@/types/user-interfaces'
 export default async function TopicsBoardPage() {
 
   const session = await GetServerSession();
-  if (!session)
-    return;
 
   const retrievedTopics = await retrieveAllTopicPosts();
   const userIds = retrievedTopics.map(topic => topic.userId);

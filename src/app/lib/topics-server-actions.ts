@@ -4,12 +4,12 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod';
 
-import { TopicPostSchema, TopicPostValidationErrors, TopicPostCommentSchema, TopicPostCommentValidationErrors } from './utils/topics-validation'
-import { GetServerSession }  from './utils/get-server-session';
+import { TopicPostSchema, TopicPostErrors, TopicPostCommentSchema, TopicPostCommentErrors } from './utils/topics-validation'
+import { GetServerSession } from './utils/get-server-session';
 import { getDb } from "./mongodb";
-import { Db, ObjectId } from 'mongodb'
+import { Db, ObjectId, InsertOneResult, UpdateResult } from 'mongodb'
 
-type PostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostValidationErrors; apiError: string | undefined }
+type PostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostErrors }
 
 export async function createTopicPost(prevState: any, formData: FormData): Promise<PostTopicResult> {
 
@@ -19,13 +19,12 @@ export async function createTopicPost(prevState: any, formData: FormData): Promi
             success: result.success,
             message: result.message,
             validationErrors: result.validationErrors,
-            apiError: result.apiError
         };
     else
         return { success: true };
 }
 
-type EditPostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostValidationErrors; apiError: string | undefined }
+type EditPostTopicResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostErrors }
 
 export async function editTopicPost(targetId: string, prevState: any, formData: FormData): Promise<EditPostTopicResult> {
 
@@ -36,7 +35,6 @@ export async function editTopicPost(targetId: string, prevState: any, formData: 
             success: result.success,
             message: result.message,
             validationErrors: result.validationErrors,
-            apiError: result.apiError
         };
     }
     else
@@ -56,15 +54,10 @@ async function handleTopicPostUpdate(targetId: string, formData: FormData) {
             success: false,
             validationErrors: flattenedErrors.fieldErrors,
             message: targetId ? 'Missing Fields, topic editing failed' : 'Missing Fields, topic posting failed',
-            apiError: undefined
         }
     }
 
     const session = await GetServerSession();
-    if (!session) {
-        // return unauthorized page to prompt relogin (do later)
-    }
-
     const posts = (await getDb()).collection('posts');
 
     if (targetId) {
@@ -100,7 +93,7 @@ async function handleTopicPostUpdate(targetId: string, formData: FormData) {
 
 type DeleteTopicPostResult = { success: true } | { success: false; apiError: string | undefined; }
 
-export async function deleteTopicPost(topicId: string) : Promise<DeleteTopicPostResult> {
+export async function deleteTopicPost(topicId: string): Promise<DeleteTopicPostResult> {
     const session = await GetServerSession();
     if (!session) {
         // return unauthorized page to prompt relogin (do later)
@@ -127,39 +120,38 @@ export async function deleteTopicPost(topicId: string) : Promise<DeleteTopicPost
     return { success: true }
 }
 
-type PostTopicCommentResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostCommentValidationErrors; apiError: string | undefined }
+type PostTopicCommentResult = { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostCommentErrors }
 
 export async function addCommentToTopicPost(topicId: string, prevState: any, formData: FormData): Promise<PostTopicCommentResult> {
 
     var result = await handleTopicPostCommentUpdate(topicId, 'create', formData);
-
     if (result) {
         return {
             success: result.success,
             message: result.message,
             validationErrors: result.validationErrors,
-            apiError: result.apiError
         };
     }
-    else
-        return { success: true };
+    else {
+        return { success: true }
+    }
 }
 
-type EditPostTopicCommentResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostCommentValidationErrors; apiError: string | undefined }
+type EditPostTopicCommentResult = { success: true } | { success: false; message: string | undefined; validationErrors?: TopicPostCommentErrors }
 
-export async function editTopicPostComment(targetId: string, prevState: any, formData: FormData): Promise<EditPostTopicCommentResult> {
+export async function editTopicPostComment(topicId: string, prevState: any, formData: FormData): Promise<EditPostTopicCommentResult> {
 
-    var result = await handleTopicPostCommentUpdate(targetId, 'edit', formData);
+    var result = await handleTopicPostCommentUpdate(topicId, 'edit', formData);
     if (result) {
         return {
             success: result.success,
             message: result.message,
             validationErrors: result.validationErrors,
-            apiError: result.apiError
         };
     }
-    else
-        return { success: true };
+    else {
+        return { success: true }
+    }
 }
 
 async function handleTopicPostCommentUpdate(topicId: string, updateType: 'create' | 'edit', formData: FormData) {
@@ -174,7 +166,6 @@ async function handleTopicPostCommentUpdate(topicId: string, updateType: 'create
             success: false,
             validationErrors: flattenedErrors.fieldErrors,
             message: 'Missing Fields, comment posting failed',
-            apiError: undefined
         }
     }
 
@@ -184,15 +175,16 @@ async function handleTopicPostCommentUpdate(topicId: string, updateType: 'create
         return {
             success: false,
             message: 'User not authenticated',
-            apiError: 'Unauthorized',
         };
     }
 
     const comments = (await getDb()).collection('comments');
 
     switch (updateType) {
-        case 'edit':
-            await comments.updateOne(
+        case 'edit': {
+            let commentUpdateResult: UpdateResult<Document> | null = null;
+
+            commentUpdateResult = await comments.updateOne(
                 { _id: new ObjectId(topicId) },
                 {
                     $set: {
@@ -201,8 +193,23 @@ async function handleTopicPostCommentUpdate(topicId: string, updateType: 'create
                     }
                 }
             );
-        case 'create':
-            await comments.insertOne({
+            if (commentUpdateResult?.acknowledged) {
+                revalidatePath(`/dashboard/topics-board/${topicId.toString()}`);
+            }
+            else {
+                return {
+                    success: false,
+                    message: "Comment editing failed, please try again",
+                    validationErrors: undefined,
+                }
+            }
+            break;
+        }
+        case 'create': {
+
+            let createCommentResult: InsertOneResult<Document> | null = null;
+
+            createCommentResult = await comments.insertOne({
                 postId: new ObjectId(topicId),
                 content: validatedFields.data.content,
                 userId: session?.user.id,
@@ -211,21 +218,33 @@ async function handleTopicPostCommentUpdate(topicId: string, updateType: 'create
                 dislikes: 0,
                 lastEditedAt: new Date(),
             });
+
+            if (createCommentResult?.acknowledged) {
+                revalidatePath(`/dashboard/topics-board/${topicId.toString()}`);
+            }
+            else {
+                return {
+                    success: false,
+                    message: "Comment creation failed, please try again",
+                    validationErrors: undefined,
+                }
+            }
             break;
+        }
     }
 
-    revalidatePath(`/dashboard/topics-board/${topicId.toString()}`);
+    return { success: true }
 }
 
-type DeleteTopicPostCommentResult = { success: true } | { success: false; apiError: string | undefined; }
+type DeleteTopicPostCommentResult = { success: true } | { success: false; message: string | undefined; }
 
-export async function deleteTopicPostComment(postId: string, commentId: string) : Promise<DeleteTopicPostCommentResult> {
+export async function deleteTopicPostComment(postId: string, commentId: string): Promise<DeleteTopicPostCommentResult> {
     const session = await GetServerSession();
     if (!session) {
         // return unauthorized page to prompt relogin (do later)
         return {
             success: false,
-            apiError: "Unauthorized",
+            message: "Unauthorized",
         };
     }
 
@@ -238,7 +257,7 @@ export async function deleteTopicPostComment(postId: string, commentId: string) 
     } catch (e) {
         return {
             success: false,
-            apiError: "Write deletion failed"
+            message: "Write deletion failed"
         }
     }
     revalidatePath(`/dashboard/topics-board/${postId}`);

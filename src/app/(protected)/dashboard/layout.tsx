@@ -1,8 +1,9 @@
 ﻿import { ReactNode } from "react";
 import type { Metadata } from "next";
-import { headers } from 'next/headers'
-import { auth } from '@/app/lib/auth'
-import { redirect } from 'next/navigation';
+import { headers } from "next/headers";
+import { auth } from "@/app/lib/auth";
+import { redirect } from "next/navigation";
+import { GetServerSession } from "@/app/lib/utils/get-server-session";
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -10,15 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Layout({ children }: { children: ReactNode }) {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    })
+    GetServerSession();
 
-    if (!session) {
-        redirect('/login');
-    }
-
-    return (
-        <div>{children}</div>
-    );
+    return <div>{children}</div>;
 }

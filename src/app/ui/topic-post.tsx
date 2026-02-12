@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useActionState } from 'react';
 import { LuThumbsUp, LuThumbsDown, LuEllipsisVertical, LuSquarePen, LuTrash2, LuSend, LuArrowLeft } from 'react-icons/lu';
 import Link from 'next/link'
 import { UserData } from '@/types/user-interfaces'
-import { Topic, TopicComment, TopicPostCommentValidationErrors } from '@/app/lib/utils/topics-validation';
+import { Topic, TopicComment, TopicPostCommentErrors } from '@/app/lib/utils/topics-validation';
 import {
     addCommentToTopicPost,
     editTopicPostComment,
@@ -26,15 +26,12 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
     const [editedComment, setEditedComment] = useState('');
     const [commentToUpdateId, setCommentToUpdateId] = useState(' ');
 
-    const [createCommentsValidationError, setCreateCommentsValidationError] = useState<TopicPostCommentValidationErrors | null>(null);
-    const [createCommentsFailedError, setCreateCommentsFailedError] = useState<string | undefined>();
-
-    const [editCommentsValidationError, setEditCommentsValidationError] = useState<TopicPostCommentValidationErrors | null>(null);
-    const [editCommentsFailedError, setEditCommentsFailedError] = useState<string | undefined>("");
-
-    const commentTopicPostBindId = addCommentToTopicPost.bind(null, postTopic._id);
+    const [createCommentsError, setCreateCommentsError] = useState<TopicPostCommentErrors | null>(null);
+    const [editCommentsError, setEditCommentsError] = useState<TopicPostCommentErrors | null>(null);
 
     const [isEditingComment, setIsEditingComment] = useState(false);
+
+    const commentTopicPostBindId = addCommentToTopicPost.bind(null, postTopic._id);
     const [createCommentResult, createCommentFormAction, isCreationPending] = useActionState(commentTopicPostBindId, null);
 
     const bindedEditTopicComment = editTopicPostComment.bind(null, commentToUpdateId);
@@ -68,46 +65,57 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
 
     const handleCommentDeletion = async () => {
         await deleteTopicPostComment(contextPostId, commentIdToDelete);
+
         setContextPostId("");
         setCommentIdToDelete("");
         setShowCommentConfirmDeletionModal(false);
     }
 
     useEffect(() => {
-        if (createCommentResult && !createCommentResult.success) {
+        if (createCommentResult) {
 
-            // Server sided errors
-            if (createCommentResult.apiError) {
-                setCreateCommentsFailedError(createCommentResult.apiError);
+            if(!createCommentResult.success) {
+                // Validation errors
+                if (createCommentResult.validationErrors) {
+                    setCreateCommentsError({
+                        content: createCommentResult.validationErrors.content
+                    });
+                } 
+                // BE errors
+                else if(createCommentResult.message) {
+                    let parsedMsg: string[] = [createCommentResult.message];
+                    
+                    setCreateCommentsError({
+                        content: parsedMsg
+                    });
+                }
             }
-
-            // Client sided errors
-            else if (createCommentResult.validationErrors) {
-                setCreateCommentsValidationError({
-                    content: createCommentResult.validationErrors.content
-                });
+            else {
+                setNewComment("");
+                setCreateCommentsError(null);
             }
-            setCreateCommentsFailedError(createCommentResult.message);
         }
-        setNewComment("");
     }, [createCommentResult]);
 
     useEffect(() => {
-        if (editCommentResult && !editCommentResult.success) {
-
-            // Server sided errors
-            if (editCommentResult.apiError) {
-                setEditCommentsFailedError(editCommentResult.apiError);
+        if (editCommentResult) {
+            if(!editCommentResult.success) {
+                // Validation errors
+                if (editCommentResult.validationErrors) {
+                    setEditCommentsError(editCommentResult.validationErrors);
+                }
+                // BE errors
+                else if(editCommentResult.message) {
+                    let parsedMsg: string[] = [editCommentResult.message] ;
+                    
+                    setEditCommentsError({
+                        content: parsedMsg
+                    });
+                }
             }
-
-            // Client sided errors
-            else if (editCommentResult.validationErrors) {
-                setEditCommentsValidationError(editCommentResult.validationErrors);
+            else {
+                handleCancelEditing();
             }
-            setEditCommentsFailedError(editCommentResult.message);
-        }
-        else {
-            handleCancelEditing();
         }
     }, [editCommentResult]);
 
@@ -153,6 +161,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
         setEditedComment("");
         setCommentToUpdateId("");
         setCommentMenuId("");
+        setEditCommentsError(null);
     }
 
     return (
@@ -215,15 +224,16 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                         )}
                                     </div>
                                     
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <span className="font-medium text-lg">{postTopic.username}</span>
-                                        <span className="mx-2">•</span>
-                                        <span>{new Date(postTopic.createdAt).toLocaleString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}</span>
-                                    </div>
+                                    
+                                </div>
+                                <div className="flex items-center text-sm text-gray-600">
+                                    <span className="font-medium text-lg">{postTopic.username}</span>
+                                    <span className="mx-2">•</span>
+                                    <span>{new Date(postTopic.createdAt).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}</span>
                                 </div>
                             </div>
 
@@ -280,7 +290,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                     />
                                 </div>
                                 <div id="create-comment-error" aria-live="polite" aria-atomic="true">
-                                    {createCommentsValidationError?.content && createCommentsValidationError.content.map((error: string) => (
+                                    {createCommentsError?.content && createCommentsError.content.map((error: string) => (
                                         <p className="mt-2 text-sm text-red-500" key={error}>
                                             {error}
                                         </p>
@@ -368,7 +378,7 @@ export default function TopicPost({ userData, postTopic, postTopicComments }: { 
                                                     />
                                                     <div className="flex flex-row justify-between">
                                                         <div id="edit-comment-error" aria-live="polite" aria-atomic="true">
-                                                            {editCommentsValidationError?.content && editCommentsValidationError.content.map((error: string) => (
+                                                            {editCommentsError?.content && editCommentsError.content.map((error: string) => (
                                                                 <p className="mt-2 text-sm text-red-500" key={error}>
                                                                     {error}
                                                                 </p>

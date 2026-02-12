@@ -12,7 +12,15 @@ interface SimpleModalProps {
     onClose: () => void
 }
 
-export function SimpleModal({ isOpen, title, description, confirmBtnText, cancelBtnText, onConfirm, onClose }: SimpleModalProps) {
+export function SimpleModal({ 
+  isOpen, 
+  title, 
+  description, 
+  confirmBtnText, 
+  cancelBtnText, 
+  onConfirm, 
+  onClose,
+ }: SimpleModalProps) {
   useEffect(() => {
     if (isOpen) {
       // Prevent scrolling
