@@ -5,9 +5,9 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { headers } from "next/headers"
-import { SignUpFormSchema, LoginFormSchema, SignUpValidationErrors, LoginValidationErrors } from './utils/user-form-validation'
+import { SignUpFormSchema, LoginFormSchema, SignUpErrors, LoginErrors } from './utils/user-form-validation'
 
-type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
+type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpErrors; apiError: string | undefined }
 
 export async function signup(prevState: any, formData: FormData): Promise<SignUpResult> {
 
@@ -47,7 +47,7 @@ export async function signup(prevState: any, formData: FormData): Promise<SignUp
   redirect('/dashboard');
 }
 
-type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
+type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginErrors; apiError: string | undefined }
 
 export async function login(prevState: any, formData: FormData) : Promise<LoginResult> {
 

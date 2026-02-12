@@ -1,10 +1,10 @@
 'use client'
 
 import { authClient } from '@/app/lib/auth-client'
-import { SignUpFormSchema, LoginFormSchema, LoginValidationErrors, SignUpValidationErrors } from './utils/user-form-validation'
+import { SignUpFormSchema, LoginFormSchema, LoginErrors, SignUpErrors } from './utils/user-form-validation'
 import { z } from 'zod';
 
-type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpValidationErrors; apiError: string | undefined }
+type SignUpResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: SignUpErrors }
 
 export async function emailSignup(username: string, email:string, password: string, confirmPassword: string): Promise<SignUpResult> {
 
@@ -22,10 +22,9 @@ export async function emailSignup(username: string, email:string, password: stri
       success: false,
       validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing or incomplete fields, sign up failed.',
-      apiError: undefined
     }
   }
-  
+
   const { data, error } = await authClient.signUp.email({
     name: validatedFields.data.name,
     email: validatedFields.data.email,
@@ -45,13 +44,13 @@ export async function emailSignup(username: string, email:string, password: stri
   });
   
   if(error) {
-    return { success: false, message: undefined, apiError: error.message }
+    return { success: false, message: error.message }
   }
   
   return { success: true };
 }
 
-type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginValidationErrors; apiError: string | undefined }
+type LoginResult = | { success: true } | { success: false; message: string | undefined; validationErrors?: LoginErrors }
 
 export async function emailLogin(inputEmail: string, inputPassword: string): Promise<LoginResult> {
 
@@ -67,7 +66,6 @@ export async function emailLogin(inputEmail: string, inputPassword: string): Pro
       success: false,
       validationErrors: flattenedErrors.fieldErrors,
       message: 'Missing or incomplete fields, login failed.',
-      apiError: undefined
     }
   }
 
@@ -88,7 +86,7 @@ export async function emailLogin(inputEmail: string, inputPassword: string): Pro
   });
 
   if(error) {
-    return { success: false, message: undefined, apiError: error.message }
+    return { success: false, message: error.message }
   }
   
   return { success: true };

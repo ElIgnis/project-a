@@ -3,14 +3,14 @@
 import { useState, useEffect, useActionState } from 'react';
 import { LuUpload, LuX } from 'react-icons/lu';
 import { editTopicPost } from '@/app/lib/topics-server-actions';
-import { TopicPostValidationErrors, Topic } from '@/app/lib/utils/topics-validation';
+import { TopicPostErrors, Topic } from '@/app/lib/utils/topics-validation';
 import Link from 'next/link'
 import { UserData } from '@/types/user-interfaces'
 import { useRouter } from 'next/navigation';
 
 export default function CreateTopic({ userData, postTopic }: { userData: UserData, postTopic: Topic }) {
 
-    const [validationErrors, setValidationErrors] = useState<TopicPostValidationErrors | null>(null);
+    const [validationErrors, setValidationErrors] = useState<TopicPostErrors | null>(null);
     const [postFailedError, setPostFailedError] = useState<string | undefined>("");
     const [title, setTitle] = useState(postTopic.title);
     const [content, setContent] = useState(postTopic.content);

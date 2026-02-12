@@ -4,17 +4,11 @@ import { UserData } from '@/types/user-interfaces'
 
 export default async function CreateTopicPage() {
 
-    const session = await GetServerSession();
-    if (!session)
-        return;
-
-    const userData : UserData = {
-        ...session.user
-    };
+    await GetServerSession();
 
     return (
         <>
-            <CreateTopic userData={userData} />
+            <CreateTopic />
         </>
     );
 }
