@@ -52,6 +52,12 @@ export default function SignupForm() {
                     }
                 }
             } else {
+                setSignUpErrors({
+                    email: undefined,
+                    password: undefined,
+                    confirmPassword: undefined,
+                    content: undefined,
+                });
                 // Redirect if no issues
                 router.push("/dashboard");
             }
